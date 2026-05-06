@@ -27,17 +27,35 @@
 python -m pip install -r backend\requirements.txt
 ```
 
-训练 PINN 模型：
+推荐训练命令：
 
 ```powershell
-python train\train_pinn.py --dataset path\to\typhoon_dataset.csv --epochs 200
+python train\train_pinn.py --dataset train\CH2025BST_pinn_dataset.csv --epochs 200 --batch-size 32 --sequence-length 4 --hidden-dim 128 --lr 1e-3
 ```
 
-训练完成后会生成：
+训练脚本会按 `storm_id` 自动划分训练集和验证集，默认保留 20% 台风作为验证集，并保存验证集指标最好的权重。
+
+训练完成后默认会生成：
 
 ```text
 backend/models/weights/typhoon_pinn_v1.pth
+backend/models/weights/typhoon_pinn_v1.summary.json
 ```
+
+常用训练参数：
+
+- `--val-ratio 0.2`：按台风分组的验证集比例，设为 `0` 可关闭验证集。
+- `--patience 40`：早停轮数，连续若干轮没有提升就提前结束。
+- `--device auto`：自动使用 `cuda` 或 `cpu`。
+- `--report path\to\summary.json`：自定义训练摘要输出位置。
+- `--velocity-weight`、`--inertia-weight`、`--coriolis-weight`、`--wind-pressure-weight`、`--nearshore-weight`：调节物理约束损失权重。
+
+训练摘要 JSON 会记录：
+
+- 数据集统计和训练/验证拆分结果。
+- 每个 epoch 的 train/val loss。
+- 最优 epoch 和最优监控指标。
+- 本次训练使用的超参数和损失权重。
 
 启动后端：
 
@@ -65,6 +83,12 @@ npm run dev
 | `lat` | 是 | 纬度 |
 | `wind_speed` | 是 | 最大风速，单位 m/s |
 | `pressure` | 是 | 中心气压，单位 hPa |
+
+训练建议：
+
+- 数据按 `storm_id` 分组时，每个台风至少保留 `sequence_length + 1` 个点，默认至少需要 5 个点。
+- 当前仓库中的 `CH2025BST_pinn_dataset.csv` 主要是 3 小时和 6 小时间隔；训练完成后做接口联调时，建议优先使用相近的 `time_step_hours`。
+- 如果 CSV 来自 Excel 导出，脚本已经兼容 UTF-8 BOM，不需要手动去掉表头乱码。
 
 ## 接口输入
 
