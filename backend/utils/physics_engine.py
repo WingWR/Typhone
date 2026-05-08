@@ -71,9 +71,6 @@ class FeatureScaler:
         }
         return cls({**DEFAULT_FEATURE_RANGES, **ranges})
 
-    def to_dict(self) -> dict[str, tuple[float, float]]:
-        return {key: (float(value[0]), float(value[1])) for key, value in self.ranges.items()}
-
     def normalize_feature(self, value: float, feature: str) -> float:
         low, high = self.ranges[feature]
         span = max(high - low, 1e-6)
