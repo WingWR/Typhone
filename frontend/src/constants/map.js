@@ -1,5 +1,3 @@
-export const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN ?? "";
-export const MAP_STYLE_URL = "mapbox://styles/mapbox/dark-v11";
 export const DARK_TILE_URL = "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png";
 
 export const INITIAL_VIEW_STATE = {

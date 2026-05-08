@@ -1,0 +1,872 @@
+{
+  "checkpoint_path": "E:\\Tempory\\Typhone\\backend\\models\\weights\\typhoon_pinn_v1.pth",
+  "report_path": "E:\\Tempory\\Typhone\\backend\\models\\weights\\typhoon_pinn_v1.summary.json",
+  "best_epoch": 10,
+  "best_metric_name": "val_loss",
+  "best_metric": 0.19091445,
+  "epochs_completed": 25,
+  "early_stopped": true,
+  "used_validation": true,
+  "dataset_summary": {
+    "all": {
+      "points": 999,
+      "storms": 32,
+      "min_points_per_storm": 9,
+      "max_points_per_storm": 66,
+      "avg_points_per_storm": 31.22,
+      "time_step_hours": {
+        "3.0": 242,
+        "6.0": 725
+      },
+      "feature_ranges": {
+        "t_hours": {
+          "min": 0.0,
+          "max": 324.0
+        },
+        "lng": {
+          "min": 97.8,
+          "max": 196.0
+        },
+        "lat": {
+          "min": 3.6,
+          "max": 48.7
+        },
+        "wind_speed": {
+          "min": 10.0,
+          "max": 68.0
+        },
+        "pressure": {
+          "min": 900.0,
+          "max": 1012.0
+        }
+      }
+    },
+    "train": {
+      "points": 821,
+      "storms": 26,
+      "min_points_per_storm": 9,
+      "max_points_per_storm": 66,
+      "avg_points_per_storm": 31.58,
+      "time_step_hours": {
+        "3.0": 211,
+        "6.0": 584
+      },
+      "feature_ranges": {
+        "t_hours": {
+          "min": 0.0,
+          "max": 324.0
+        },
+        "lng": {
+          "min": 97.8,
+          "max": 196.0
+        },
+        "lat": {
+          "min": 8.0,
+          "max": 48.7
+        },
+        "wind_speed": {
+          "min": 10.0,
+          "max": 68.0
+        },
+        "pressure": {
+          "min": 900.0,
+          "max": 1008.0
+        }
+      }
+    },
+    "val": {
+      "points": 178,
+      "storms": 6,
+      "min_points_per_storm": 20,
+      "max_points_per_storm": 36,
+      "avg_points_per_storm": 29.67,
+      "time_step_hours": {
+        "3.0": 31,
+        "6.0": 141
+      },
+      "feature_ranges": {
+        "t_hours": {
+          "min": 0.0,
+          "max": 210.0
+        },
+        "lng": {
+          "min": 97.8,
+          "max": 184.2
+        },
+        "lat": {
+          "min": 3.6,
+          "max": 40.6
+        },
+        "wind_speed": {
+          "min": 10.0,
+          "max": 38.0
+        },
+        "pressure": {
+          "min": 965.0,
+          "max": 1012.0
+        }
+      }
+    },
+    "train_storm_ids": [
+      "2025_0001",
+      "2025_0002",
+      "2025_0003",
+      "2025_0004",
+      "2025_0005",
+      "2025_0006",
+      "2025_0007",
+      "2025_0009",
+      "2025_0010",
+      "2025_0011",
+      "2025_0012",
+      "2025_0013",
+      "2025_0014",
+      "2025_0015",
+      "2025_0016",
+      "2025_0017",
+      "2025_0018",
+      "2025_0021",
+      "2025_0022",
+      "2025_0023",
+      "2025_0024",
+      "2025_0025",
+      "2025_0026",
+      "2025_0029",
+      "2025_0030",
+      "2025_0031"
+    ],
+    "val_storm_ids": [
+      "2025_0008",
+      "2025_0019",
+      "2025_0020",
+      "2025_0027",
+      "2025_0028",
+      "2025_0032"
+    ],
+    "train_sequence_samples": 717,
+    "val_sequence_samples": 154
+  },
+  "training_config": {
+    "dataset_path": "E:/Tempory/Typhone/train/CH2025BST_pinn_dataset.csv",
+    "output_path": "E:\\Tempory\\Typhone\\backend\\models\\weights\\typhoon_pinn_v1.pth",
+    "sequence_length": 4,
+    "hidden_dim": 128,
+    "epochs": 50,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "val_ratio": 0.2,
+    "seed": 42,
+    "device": "cpu",
+    "patience": 15,
+    "min_delta": 0.0001,
+    "grad_clip": 1.0,
+    "velocity_weight": 0.001,
+    "inertia_weight": 10000.0,
+    "coriolis_weight": 10000.0,
+    "wind_pressure_weight": 0.05,
+    "nearshore_weight": 0.02
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train": {
+        "loss": 8.35888279,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.16822083,
+        "velocity_loss": 3598.95861655,
+        "inertia_loss": 1.77e-06,
+        "coriolis_loss": 5.42e-06,
+        "wind_pressure_loss": 0.12617199,
+        "nearshore_decay_loss": 225.67548829
+      },
+      "val": {
+        "loss": 0.54431933,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.09771558,
+        "velocity_loss": 333.2729619,
+        "inertia_loss": 2.17e-06,
+        "coriolis_loss": 6.57e-06,
+        "wind_pressure_loss": 0.00621922,
+        "nearshore_decay_loss": 1.27818229
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.54431933,
+      "is_best": true
+    },
+    {
+      "epoch": 2,
+      "train": {
+        "loss": 0.54641506,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.09459463,
+        "velocity_loss": 403.25334835,
+        "inertia_loss": 6e-07,
+        "coriolis_loss": 1.74e-06,
+        "wind_pressure_loss": 0.09631789,
+        "nearshore_decay_loss": 1.0207625
+      },
+      "val": {
+        "loss": 0.37029384,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.06977254,
+        "velocity_loss": 258.0472428,
+        "inertia_loss": 1.9e-07,
+        "coriolis_loss": 6e-07,
+        "wind_pressure_loss": 0.10583782,
+        "nearshore_decay_loss": 1.4617436
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.37029384,
+      "is_best": true
+    },
+    {
+      "epoch": 3,
+      "train": {
+        "loss": 0.22482129,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.04445531,
+        "velocity_loss": 156.63469821,
+        "inertia_loss": 2.9e-07,
+        "coriolis_loss": 7.5e-07,
+        "wind_pressure_loss": 0.09057834,
+        "nearshore_decay_loss": 0.43736291
+      },
+      "val": {
+        "loss": 0.30504537,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.03011607,
+        "velocity_loss": 152.00113192,
+        "inertia_loss": 4e-07,
+        "coriolis_loss": 9.2e-07,
+        "wind_pressure_loss": 0.01796567,
+        "nearshore_decay_loss": 5.43887011
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.30504537,
+      "is_best": true
+    },
+    {
+      "epoch": 4,
+      "train": {
+        "loss": 0.19029279,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.02515163,
+        "velocity_loss": 145.38549734,
+        "inertia_loss": 2.3e-07,
+        "coriolis_loss": 5.2e-07,
+        "wind_pressure_loss": 0.08509584,
+        "nearshore_decay_loss": 0.40046576
+      },
+      "val": {
+        "loss": 0.43931684,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.03049722,
+        "velocity_loss": 296.46525752,
+        "inertia_loss": 1.7e-07,
+        "coriolis_loss": 3.4e-07,
+        "wind_pressure_loss": 0.0178944,
+        "nearshore_decay_loss": 5.320732
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.43931684,
+      "is_best": false
+    },
+    {
+      "epoch": 5,
+      "train": {
+        "loss": 0.16893926,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.0213676,
+        "velocity_loss": 133.44356811,
+        "inertia_loss": 2.1e-07,
+        "coriolis_loss": 4.3e-07,
+        "wind_pressure_loss": 0.05037312,
+        "nearshore_decay_loss": 0.26451277
+      },
+      "val": {
+        "loss": 0.27250022,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.02824549,
+        "velocity_loss": 162.54042509,
+        "inertia_loss": 2.3e-07,
+        "coriolis_loss": 4.5e-07,
+        "wind_pressure_loss": 0.00620841,
+        "nearshore_decay_loss": 3.72856015
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.27250022,
+      "is_best": true
+    },
+    {
+      "epoch": 6,
+      "train": {
+        "loss": 0.14713392,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01902644,
+        "velocity_loss": 115.22905947,
+        "inertia_loss": 2e-07,
+        "coriolis_loss": 4e-07,
+        "wind_pressure_loss": 0.05246991,
+        "nearshore_decay_loss": 0.21470779
+      },
+      "val": {
+        "loss": 0.23716108,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.02397552,
+        "velocity_loss": 109.9202972,
+        "inertia_loss": 3.1e-07,
+        "coriolis_loss": 6.7e-07,
+        "wind_pressure_loss": 0.00727829,
+        "nearshore_decay_loss": 4.65390548
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.23716108,
+      "is_best": true
+    },
+    {
+      "epoch": 7,
+      "train": {
+        "loss": 0.15438104,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01736182,
+        "velocity_loss": 125.81048969,
+        "inertia_loss": 1.9e-07,
+        "coriolis_loss": 3.8e-07,
+        "wind_pressure_loss": 0.04652947,
+        "nearshore_decay_loss": 0.15502822
+      },
+      "val": {
+        "loss": 0.27691259,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.02267963,
+        "velocity_loss": 149.61107844,
+        "inertia_loss": 2e-07,
+        "coriolis_loss": 3.7e-07,
+        "wind_pressure_loss": 0.00514828,
+        "nearshore_decay_loss": 4.93070071
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.27691259,
+      "is_best": false
+    },
+    {
+      "epoch": 8,
+      "train": {
+        "loss": 0.14270871,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01694729,
+        "velocity_loss": 113.33898034,
+        "inertia_loss": 2.2e-07,
+        "coriolis_loss": 4.7e-07,
+        "wind_pressure_loss": 0.0463308,
+        "nearshore_decay_loss": 0.1599138
+      },
+      "val": {
+        "loss": 0.30909457,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.0244186,
+        "velocity_loss": 190.51253202,
+        "inertia_loss": 2.1e-07,
+        "coriolis_loss": 4.3e-07,
+        "wind_pressure_loss": 0.00860365,
+        "nearshore_decay_loss": 4.36726222
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.30909457,
+      "is_best": false
+    },
+    {
+      "epoch": 9,
+      "train": {
+        "loss": 0.13613527,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01655666,
+        "velocity_loss": 110.07944207,
+        "inertia_loss": 1.7e-07,
+        "coriolis_loss": 3.2e-07,
+        "wind_pressure_loss": 0.03288456,
+        "nearshore_decay_loss": 0.1444028
+      },
+      "val": {
+        "loss": 0.28198408,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.02098503,
+        "velocity_loss": 142.07321841,
+        "inertia_loss": 2.2e-07,
+        "coriolis_loss": 4.3e-07,
+        "wind_pressure_loss": 0.00296227,
+        "nearshore_decay_loss": 5.61067084
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.28198408,
+      "is_best": false
+    },
+    {
+      "epoch": 10,
+      "train": {
+        "loss": 0.12566801,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.014763,
+        "velocity_loss": 99.70755395,
+        "inertia_loss": 1.9e-07,
+        "coriolis_loss": 3.7e-07,
+        "wind_pressure_loss": 0.03981611,
+        "nearshore_decay_loss": 0.17814921
+      },
+      "val": {
+        "loss": 0.19091445,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01942705,
+        "velocity_loss": 96.14502508,
+        "inertia_loss": 3.9e-07,
+        "coriolis_loss": 8.6e-07,
+        "wind_pressure_loss": 0.00471017,
+        "nearshore_decay_loss": 3.13134319
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.19091445,
+      "is_best": true
+    },
+    {
+      "epoch": 11,
+      "train": {
+        "loss": 0.11913628,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01950286,
+        "velocity_loss": 88.38247322,
+        "inertia_loss": 1.9e-07,
+        "coriolis_loss": 3.9e-07,
+        "wind_pressure_loss": 0.04303377,
+        "nearshore_decay_loss": 0.16523932
+      },
+      "val": {
+        "loss": 0.23833843,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.03206927,
+        "velocity_loss": 163.24221683,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.3e-07,
+        "wind_pressure_loss": 0.00562526,
+        "nearshore_decay_loss": 1.87815444
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.23833843,
+      "is_best": false
+    },
+    {
+      "epoch": 12,
+      "train": {
+        "loss": 0.1122507,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01660103,
+        "velocity_loss": 83.95584859,
+        "inertia_loss": 1.9e-07,
+        "coriolis_loss": 3.6e-07,
+        "wind_pressure_loss": 0.04857889,
+        "nearshore_decay_loss": 0.19176733
+      },
+      "val": {
+        "loss": 0.27253923,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01939129,
+        "velocity_loss": 144.47250604,
+        "inertia_loss": 2e-07,
+        "coriolis_loss": 4e-07,
+        "wind_pressure_loss": 0.00101509,
+        "nearshore_decay_loss": 5.13345882
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.27253923,
+      "is_best": false
+    },
+    {
+      "epoch": 13,
+      "train": {
+        "loss": 0.11226324,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01825782,
+        "velocity_loss": 81.18644442,
+        "inertia_loss": 2.3e-07,
+        "coriolis_loss": 4.7e-07,
+        "wind_pressure_loss": 0.03981533,
+        "nearshore_decay_loss": 0.19568324
+      },
+      "val": {
+        "loss": 0.22167315,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01902653,
+        "velocity_loss": 124.09400207,
+        "inertia_loss": 1.9e-07,
+        "coriolis_loss": 3.3e-07,
+        "wind_pressure_loss": 0.01156574,
+        "nearshore_decay_loss": 3.63821135
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.22167315,
+      "is_best": false
+    },
+    {
+      "epoch": 14,
+      "train": {
+        "loss": 0.10257204,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01381089,
+        "velocity_loss": 75.59594468,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.4e-07,
+        "wind_pressure_loss": 0.03863411,
+        "nearshore_decay_loss": 0.30104538
+      },
+      "val": {
+        "loss": 0.19929203,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.0264838,
+        "velocity_loss": 131.15831687,
+        "inertia_loss": 2.5e-07,
+        "coriolis_loss": 5e-07,
+        "wind_pressure_loss": 0.00245033,
+        "nearshore_decay_loss": 1.70296799
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.19929203,
+      "is_best": false
+    },
+    {
+      "epoch": 15,
+      "train": {
+        "loss": 0.12056375,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01781668,
+        "velocity_loss": 92.73021274,
+        "inertia_loss": 1.7e-07,
+        "coriolis_loss": 3.2e-07,
+        "wind_pressure_loss": 0.0497699,
+        "nearshore_decay_loss": 0.12917505
+      },
+      "val": {
+        "loss": 0.19610254,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01973451,
+        "velocity_loss": 115.17712363,
+        "inertia_loss": 2.1e-07,
+        "coriolis_loss": 4.1e-07,
+        "wind_pressure_loss": 0.00222904,
+        "nearshore_decay_loss": 2.74740053
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.19610254,
+      "is_best": false
+    },
+    {
+      "epoch": 16,
+      "train": {
+        "loss": 0.11988108,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01393478,
+        "velocity_loss": 96.11020061,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.6e-07,
+        "wind_pressure_loss": 0.03872971,
+        "nearshore_decay_loss": 0.12406072
+      },
+      "val": {
+        "loss": 0.35840413,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.02196456,
+        "velocity_loss": 182.93273331,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.2e-07,
+        "wind_pressure_loss": 0.00817489,
+        "nearshore_decay_loss": 7.40566058
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.35840413,
+      "is_best": false
+    },
+    {
+      "epoch": 17,
+      "train": {
+        "loss": 0.1328417,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01420312,
+        "velocity_loss": 108.39653743,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.4e-07,
+        "wind_pressure_loss": 0.03917547,
+        "nearshore_decay_loss": 0.15606101
+      },
+      "val": {
+        "loss": 0.27284039,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01732792,
+        "velocity_loss": 161.05602235,
+        "inertia_loss": 1.6e-07,
+        "coriolis_loss": 3e-07,
+        "wind_pressure_loss": 0.0013443,
+        "nearshore_decay_loss": 4.48794364
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.27284039,
+      "is_best": false
+    },
+    {
+      "epoch": 18,
+      "train": {
+        "loss": 0.11548582,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01565765,
+        "velocity_loss": 89.46496768,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.4e-07,
+        "wind_pressure_loss": 0.02833587,
+        "nearshore_decay_loss": 0.18709195
+      },
+      "val": {
+        "loss": 0.27939177,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01909351,
+        "velocity_loss": 136.89976759,
+        "inertia_loss": 2.7e-07,
+        "coriolis_loss": 5.6e-07,
+        "wind_pressure_loss": 0.0053824,
+        "nearshore_decay_loss": 5.74026603
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.27939177,
+      "is_best": false
+    },
+    {
+      "epoch": 19,
+      "train": {
+        "loss": 0.09520485,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01251741,
+        "velocity_loss": 74.24406711,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.4e-07,
+        "wind_pressure_loss": 0.02760277,
+        "nearshore_decay_loss": 0.09362964
+      },
+      "val": {
+        "loss": 0.26846085,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01742559,
+        "velocity_loss": 146.86667901,
+        "inertia_loss": 2.3e-07,
+        "coriolis_loss": 4.6e-07,
+        "wind_pressure_loss": 0.00074127,
+        "nearshore_decay_loss": 4.85886697
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.26846085,
+      "is_best": false
+    },
+    {
+      "epoch": 20,
+      "train": {
+        "loss": 0.09013661,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01208877,
+        "velocity_loss": 68.50854678,
+        "inertia_loss": 2e-07,
+        "coriolis_loss": 4e-07,
+        "wind_pressure_loss": 0.0271668,
+        "nearshore_decay_loss": 0.11037799
+      },
+      "val": {
+        "loss": 0.28215348,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01931303,
+        "velocity_loss": 151.85540177,
+        "inertia_loss": 1.6e-07,
+        "coriolis_loss": 2.9e-07,
+        "wind_pressure_loss": 0.00086654,
+        "nearshore_decay_loss": 5.32179007
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.28215348,
+      "is_best": false
+    },
+    {
+      "epoch": 21,
+      "train": {
+        "loss": 0.08614992,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01126301,
+        "velocity_loss": 66.11163676,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.3e-07,
+        "wind_pressure_loss": 0.02164595,
+        "nearshore_decay_loss": 0.12931011
+      },
+      "val": {
+        "loss": 0.1983394,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01675635,
+        "velocity_loss": 103.4559453,
+        "inertia_loss": 2.4e-07,
+        "coriolis_loss": 4.6e-07,
+        "wind_pressure_loss": 0.00070205,
+        "nearshore_decay_loss": 3.55528711
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.1983394,
+      "is_best": false
+    },
+    {
+      "epoch": 22,
+      "train": {
+        "loss": 0.08514008,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01327821,
+        "velocity_loss": 63.45138088,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.6e-07,
+        "wind_pressure_loss": 0.02421424,
+        "nearshore_decay_loss": 0.09016677
+      },
+      "val": {
+        "loss": 0.20900805,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.02332851,
+        "velocity_loss": 143.29577795,
+        "inertia_loss": 1.6e-07,
+        "coriolis_loss": 3.2e-07,
+        "wind_pressure_loss": 0.00161171,
+        "nearshore_decay_loss": 1.87707892
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.20900805,
+      "is_best": false
+    },
+    {
+      "epoch": 23,
+      "train": {
+        "loss": 0.09332156,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01338164,
+        "velocity_loss": 70.69558301,
+        "inertia_loss": 1.8e-07,
+        "coriolis_loss": 3.4e-07,
+        "wind_pressure_loss": 0.02680692,
+        "nearshore_decay_loss": 0.13629469
+      },
+      "val": {
+        "loss": 0.22506199,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.0225038,
+        "velocity_loss": 126.55469503,
+        "inertia_loss": 1.6e-07,
+        "coriolis_loss": 2.8e-07,
+        "wind_pressure_loss": 0.00744148,
+        "nearshore_decay_loss": 3.56315556
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.22506199,
+      "is_best": false
+    },
+    {
+      "epoch": 24,
+      "train": {
+        "loss": 0.08902046,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.0124258,
+        "velocity_loss": 67.53657042,
+        "inertia_loss": 2e-07,
+        "coriolis_loss": 3.9e-07,
+        "wind_pressure_loss": 0.02312282,
+        "nearshore_decay_loss": 0.09890019
+      },
+      "val": {
+        "loss": 0.22253837,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01816713,
+        "velocity_loss": 113.954119,
+        "inertia_loss": 1.7e-07,
+        "coriolis_loss": 3.2e-07,
+        "wind_pressure_loss": 0.00020243,
+        "nearshore_decay_loss": 4.27790551
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.22253837,
+      "is_best": false
+    },
+    {
+      "epoch": 25,
+      "train": {
+        "loss": 0.09106305,
+        "samples": 717.0,
+        "batches": 23.0,
+        "data_loss": 0.01110123,
+        "velocity_loss": 70.71744966,
+        "inertia_loss": 2e-07,
+        "coriolis_loss": 4e-07,
+        "wind_pressure_loss": 0.02179456,
+        "nearshore_decay_loss": 0.10463721
+      },
+      "val": {
+        "loss": 0.26209945,
+        "samples": 154.0,
+        "batches": 5.0,
+        "data_loss": 0.01702976,
+        "velocity_loss": 141.78997446,
+        "inertia_loss": 1.6e-07,
+        "coriolis_loss": 3e-07,
+        "wind_pressure_loss": 0.0005096,
+        "nearshore_decay_loss": 4.92853676
+      },
+      "monitor_metric": "val_loss",
+      "monitor_value": 0.26209945,
+      "is_best": false
+    }
+  ],
+  "saved_at": "2026-05-08T07:26:35.034394Z"
+}

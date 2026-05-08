@@ -15,6 +15,16 @@ async function parseResponse(response) {
   return response.json();
 }
 
+export async function checkHealth() {
+  try {
+    const response = await fetch(`${API_BASE}/health`);
+    const payload = await response.json();
+    return payload.status === "ok";
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchSampleTyphoonInput() {
   const response = await fetch(`${API_BASE}/sample_typhoon_input`);
   return parseResponse(response);

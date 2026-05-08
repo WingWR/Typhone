@@ -6,7 +6,7 @@ from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 
-from backend.services.pinn_prediction_service import TyphoonPredictor
+from backend.logic.pinn_inference import TyphoonPredictor
 from backend.services.weather_service import build_weather_response
 from backend.utils.request_parser import parse_typhoon_payload
 

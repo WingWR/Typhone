@@ -1,5 +1,6 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import {
+  checkHealth,
   fetchSampleTyphoonInput,
   fetchWeatherConditions,
   predictTyphoonFromFile,
@@ -24,6 +25,7 @@ export function useTyphoonVisualizer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [manualControl, setManualControl] = useState(false);
   const [activeSourceName, setActiveSourceName] = useState("sample_typhoon_input.json");
+  const [backendReady, setBackendReady] = useState(false);
   const animationFrame = useRef(null);
 
   const combinedTrack = prediction?.combinedTrack ?? [];
@@ -66,8 +68,22 @@ export function useTyphoonVisualizer() {
   }
 
   useEffect(() => {
-    loadSampleForecast();
+    async function initBackendHealth() {
+      const ok = await checkHealth();
+      setBackendReady(ok);
+      if (!ok) {
+        setError("Backend is unreachable. Check that Flask is running on port 5000.");
+        setLoadingPrediction(false);
+      }
+    }
+    initBackendHealth();
   }, []);
+
+  useEffect(() => {
+    if (backendReady) {
+      loadSampleForecast();
+    }
+  }, [backendReady]);
 
   useEffect(() => {
     if (!prediction?.weatherContext) {
