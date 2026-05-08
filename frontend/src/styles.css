@@ -25,28 +25,3 @@ body {
     linear-gradient(180deg, #040810 0%, #02050b 100%);
 }
 
-.mapboxgl-map {
-  background: #040911;
-}
-
-.mapboxgl-canvas {
-  filter: saturate(1.04) brightness(0.93) contrast(1.03);
-}
-
-.mapboxgl-ctrl-attrib,
-.maplibregl-ctrl-attrib {
-  background: rgba(4, 11, 20, 0.72) !important;
-  color: rgba(215, 226, 245, 0.65) !important;
-  border-radius: 10px 0 0 0;
-}
-
-.mapboxgl-ctrl-attrib a,
-.maplibregl-ctrl-attrib a {
-  color: rgba(215, 226, 245, 0.78) !important;
-}
-
-.mapboxgl-ctrl-logo,
-.mapboxgl-ctrl-bottom-right,
-.mapboxgl-ctrl-bottom-left {
-  opacity: 0.75;
-}
