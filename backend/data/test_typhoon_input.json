@@ -1,0 +1,25 @@
+﻿{
+  "storm_id": "2025-0010-TEST",
+  "storm_name": "CH2025-10",
+  "basin": "East China Sea",
+  "forecast_steps": 8,
+  "time_step_hours": 6,
+  "observations": [
+    { "lng": 122.6, "lat": 19.6, "timestamp": "2025-07-22T06:00:00Z", "wind_speed": 13, "pressure": 1000 },
+    { "lng": 121.7, "lat": 19.3, "timestamp": "2025-07-22T12:00:00Z", "wind_speed": 13, "pressure": 1000 },
+    { "lng": 120.9, "lat": 19.0, "timestamp": "2025-07-22T18:00:00Z", "wind_speed": 13, "pressure": 1000 },
+    { "lng": 120.1, "lat": 18.7, "timestamp": "2025-07-23T00:00:00Z", "wind_speed": 15, "pressure": 998 },
+    { "lng": 119.6, "lat": 18.2, "timestamp": "2025-07-23T06:00:00Z", "wind_speed": 18, "pressure": 992 },
+    { "lng": 118.9, "lat": 17.7, "timestamp": "2025-07-23T12:00:00Z", "wind_speed": 20, "pressure": 990 }
+  ],
+  "actual_track": [
+    { "lng": 118.2, "lat": 17.1, "timestamp": "2025-07-23T18:00:00Z", "wind_speed": 25, "pressure": 985 },
+    { "lng": 118.4, "lat": 16.5, "timestamp": "2025-07-24T00:00:00Z", "wind_speed": 28, "pressure": 980 },
+    { "lng": 118.8, "lat": 16.2, "timestamp": "2025-07-24T06:00:00Z", "wind_speed": 28, "pressure": 980 },
+    { "lng": 119.3, "lat": 16.0, "timestamp": "2025-07-24T12:00:00Z", "wind_speed": 30, "pressure": 978 },
+    { "lng": 120.1, "lat": 16.7, "timestamp": "2025-07-24T18:00:00Z", "wind_speed": 33, "pressure": 975 },
+    { "lng": 120.5, "lat": 17.8, "timestamp": "2025-07-25T00:00:00Z", "wind_speed": 30, "pressure": 978 },
+    { "lng": 121.3, "lat": 19.6, "timestamp": "2025-07-25T06:00:00Z", "wind_speed": 23, "pressure": 985 },
+    { "lng": 123.2, "lat": 21.9, "timestamp": "2025-07-25T12:00:00Z", "wind_speed": 20, "pressure": 990 }
+  ]
+}

@@ -2,8 +2,8 @@
 
 :root {
   font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
-  color: #ecf3ff;
-  background: #050a11;
+  color: #1a2a3a;
+  background: #eef1f5;
 }
 
 * {
@@ -20,33 +20,5 @@ body,
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(38, 117, 177, 0.14), transparent 22%),
-    linear-gradient(180deg, #040810 0%, #02050b 100%);
-}
-
-.mapboxgl-map {
-  background: #040911;
-}
-
-.mapboxgl-canvas {
-  filter: saturate(1.04) brightness(0.93) contrast(1.03);
-}
-
-.mapboxgl-ctrl-attrib,
-.maplibregl-ctrl-attrib {
-  background: rgba(4, 11, 20, 0.72) !important;
-  color: rgba(215, 226, 245, 0.65) !important;
-  border-radius: 10px 0 0 0;
-}
-
-.mapboxgl-ctrl-attrib a,
-.maplibregl-ctrl-attrib a {
-  color: rgba(215, 226, 245, 0.78) !important;
-}
-
-.mapboxgl-ctrl-logo,
-.mapboxgl-ctrl-bottom-right,
-.mapboxgl-ctrl-bottom-left {
-  opacity: 0.75;
+  background: linear-gradient(180deg, #f0f3f7 0%, #e2e6ec 100%);
 }

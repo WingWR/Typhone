@@ -27,10 +27,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
 from backend.models.pinn_model import FEATURE_COLUMNS, STATE_COLUMNS, TyphoonPINN
+from backend.utils.physics_engine import EARTH_ANGULAR_VELOCITY, EARTH_RADIUS_M, SECONDS_PER_HOUR
 
-EARTH_ANGULAR_VELOCITY = 7.2921159e-5
-EARTH_RADIUS_M = 6_371_000.0
-SECONDS_PER_HOUR = 3600.0
 LOSS_PART_NAMES = (
     "data_loss",
     "velocity_loss",
