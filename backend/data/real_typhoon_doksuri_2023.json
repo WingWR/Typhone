@@ -1,0 +1,28 @@
+{
+  "storm_id": "JMA-2023-2305",
+  "storm_name": "DOKSURI",
+  "basin": "Western North Pacific",
+  "forecast_steps": 8,
+  "time_step_hours": 6,
+  "source_provider": "Japan Meteorological Agency (JMA)",
+  "source_url": "https://www.data.jma.go.jp/typhoon/data/T2305.pdf",
+  "source_note": "Times are JST (+09:00). observations and actual_track are split from the official best-track sequence.",
+  "observations": [
+    { "lng": 127.0, "lat": 15.1, "timestamp": "2023-07-24T03:00:00+09:00", "wind_speed": 35, "pressure": 970 },
+    { "lng": 126.6, "lat": 15.2, "timestamp": "2023-07-24T09:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 126.3, "lat": 15.7, "timestamp": "2023-07-24T15:00:00+09:00", "wind_speed": 45, "pressure": 950 },
+    { "lng": 125.8, "lat": 16.5, "timestamp": "2023-07-24T21:00:00+09:00", "wind_speed": 45, "pressure": 940 },
+    { "lng": 125.1, "lat": 16.9, "timestamp": "2023-07-25T03:00:00+09:00", "wind_speed": 50, "pressure": 925 },
+    { "lng": 124.6, "lat": 17.6, "timestamp": "2023-07-25T09:00:00+09:00", "wind_speed": 50, "pressure": 925 }
+  ],
+  "actual_track": [
+    { "lng": 123.7, "lat": 18.3, "timestamp": "2023-07-25T15:00:00+09:00", "wind_speed": 50, "pressure": 925 },
+    { "lng": 122.7, "lat": 18.9, "timestamp": "2023-07-25T21:00:00+09:00", "wind_speed": 50, "pressure": 925 },
+    { "lng": 121.6, "lat": 19.0, "timestamp": "2023-07-26T03:00:00+09:00", "wind_speed": 50, "pressure": 925 },
+    { "lng": 121.4, "lat": 18.9, "timestamp": "2023-07-26T09:00:00+09:00", "wind_speed": 45, "pressure": 940 },
+    { "lng": 121.0, "lat": 19.3, "timestamp": "2023-07-26T15:00:00+09:00", "wind_speed": 45, "pressure": 950 },
+    { "lng": 120.6, "lat": 19.5, "timestamp": "2023-07-26T21:00:00+09:00", "wind_speed": 40, "pressure": 955 },
+    { "lng": 120.0, "lat": 20.0, "timestamp": "2023-07-27T03:00:00+09:00", "wind_speed": 40, "pressure": 955 },
+    { "lng": 119.8, "lat": 20.7, "timestamp": "2023-07-27T09:00:00+09:00", "wind_speed": 40, "pressure": 955 }
+  ]
+}

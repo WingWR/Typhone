@@ -25,7 +25,7 @@ except Exception:  # pragma: no cover - runtime fallback path
     FEATURE_COLUMNS = ["t_hours", "lng", "lat", "wind_speed", "pressure"]
     STATE_COLUMNS = ["lng", "lat", "wind_speed", "pressure"]
 
-DEFAULT_WEIGHTS_PATH = Path(__file__).resolve().parent.parent / "models" / "weights" / "typhoon_pinn_v1.pth"
+DEFAULT_WEIGHTS_PATH = Path(__file__).resolve().parent.parent / "models" / "weights" / "typhoon_pinn_v2.pth"
 
 
 @dataclass(frozen=True)

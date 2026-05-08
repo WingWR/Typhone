@@ -71,7 +71,7 @@ function App() {
           </Typography>
         </Box>
         <Stack direction="row" spacing={2.5} sx={{ display: { xs: "none", md: "flex" }, color: "rgba(30,50,70,0.55)" }}>
-          <Typography variant="body2">Model: PINN-v1</Typography>
+          <Typography variant="body2">Model: TyPhoonPINN</Typography>
           <Typography variant="body2">Region: East China</Typography>
         </Stack>
       </Stack>
