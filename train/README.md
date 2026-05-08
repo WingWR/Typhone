@@ -6,12 +6,6 @@
 python train/train_pinn.py --dataset path\to\typhoon_dataset.csv --epochs 200 --batch-size 32 --sequence-length 4 --hidden-dim 128 --lr 1e-3
 ```
 
-兼容入口：
-
-```powershell
-python backend/training/train_pinn.py --dataset path\to\typhoon_dataset.csv --epochs 200
-```
-
 默认行为：
 
 - 按 `storm_id` 划分训练集和验证集，默认 `--val-ratio 0.2`。
