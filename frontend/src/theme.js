@@ -2,24 +2,24 @@ import { createTheme } from "@mui/material/styles";
 
 const theme = createTheme({
   palette: {
-    mode: "dark",
+    mode: "light",
     primary: {
-      main: "#f6df58",
+      main: "#1565c0",
     },
     secondary: {
-      main: "#47d4ff",
+      main: "#0288d1",
     },
     background: {
-      default: "#060b14",
-      paper: "rgba(7, 13, 24, 0.82)",
+      default: "#eef1f5",
+      paper: "rgba(255, 255, 255, 0.92)",
     },
     text: {
-      primary: "#ecf3ff",
-      secondary: "rgba(211, 223, 242, 0.78)",
+      primary: "#152433",
+      secondary: "rgba(30, 50, 70, 0.7)",
     },
   },
   shape: {
-    borderRadius: 18,
+    borderRadius: 14,
   },
   typography: {
     fontFamily: "'IBM Plex Sans', 'Segoe UI', sans-serif",

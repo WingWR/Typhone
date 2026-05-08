@@ -1,51 +1,15 @@
-{
-  "storm_id": "SH2026-DEMO-01",
+﻿{
+  "storm_id": "2026-DEMO",
   "storm_name": "Aster",
   "basin": "East China Sea",
-  "forecast_steps": 9,
+  "forecast_steps": 8,
   "time_step_hours": 2,
   "observations": [
-    {
-      "lng": 124.18,
-      "lat": 26.54,
-      "timestamp": "2026-07-21T00:00:00Z",
-      "wind_speed": 33,
-      "pressure": 980
-    },
-    {
-      "lng": 123.9,
-      "lat": 27.0,
-      "timestamp": "2026-07-21T02:00:00Z",
-      "wind_speed": 35,
-      "pressure": 976
-    },
-    {
-      "lng": 123.58,
-      "lat": 27.46,
-      "timestamp": "2026-07-21T04:00:00Z",
-      "wind_speed": 37,
-      "pressure": 973
-    },
-    {
-      "lng": 123.28,
-      "lat": 27.96,
-      "timestamp": "2026-07-21T06:00:00Z",
-      "wind_speed": 39,
-      "pressure": 970
-    },
-    {
-      "lng": 122.98,
-      "lat": 28.52,
-      "timestamp": "2026-07-21T08:00:00Z",
-      "wind_speed": 40,
-      "pressure": 968
-    },
-    {
-      "lng": 122.74,
-      "lat": 29.08,
-      "timestamp": "2026-07-21T10:00:00Z",
-      "wind_speed": 39,
-      "pressure": 969
-    }
+    { "lng": 124.18, "lat": 26.54, "timestamp": "2026-07-21T00:00:00Z", "wind_speed": 33, "pressure": 980 },
+    { "lng": 123.90, "lat": 27.00, "timestamp": "2026-07-21T02:00:00Z", "wind_speed": 35, "pressure": 976 },
+    { "lng": 123.55, "lat": 27.58, "timestamp": "2026-07-21T04:00:00Z", "wind_speed": 38, "pressure": 970 },
+    { "lng": 123.10, "lat": 28.20, "timestamp": "2026-07-21T06:00:00Z", "wind_speed": 42, "pressure": 962 },
+    { "lng": 122.65, "lat": 28.85, "timestamp": "2026-07-21T08:00:00Z", "wind_speed": 45, "pressure": 955 },
+    { "lng": 122.18, "lat": 29.50, "timestamp": "2026-07-21T10:00:00Z", "wind_speed": 48, "pressure": 948 }
   ]
 }
