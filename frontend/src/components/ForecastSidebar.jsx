@@ -1,187 +1,320 @@
+import { useRef, useState } from "react";
 import {
-  Alert,
   Box,
+  Button,
   Chip,
+  IconButton,
   Paper,
   Stack,
-  ToggleButton,
-  ToggleButtonGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
-import { WEATHER_STYLES } from "../constants/map";
-import UploadPanel from "./UploadPanel";
 
-function formatMetric(value, digits = 3, suffix = "") {
-  if (value === null || value === undefined || Number.isNaN(Number(value))) {
-    return "--";
-  }
-  return `${Number(value).toFixed(digits)}${suffix}`;
-}
+const PANEL_WIDTH = 340;
 
 function ForecastSidebar({
   activeSourceName,
   activeTrackPoint,
   error,
   loadingPrediction,
-  onLoadSample,
   onUploadFile,
   prediction,
-  setWeatherField,
-  weatherField,
-  weatherMeta,
-  weatherSummary,
 }) {
-  const activeStyle = WEATHER_STYLES[weatherField];
-  const losses = prediction?.losses ?? {};
-  const metrics = prediction?.metrics ?? {};
-  const summary = prediction?.summary ?? {};
+  const [isOpen, setIsOpen] = useState(true);
+  const fileInputRef = useRef(null);
+  const observedTrack = prediction?.observedTrack ?? [];
+  const stormName = prediction?.stormName;
+  const stormId = prediction?.stormId;
+  const forecastSteps = prediction?.forecastSteps;
 
-  return (
+  const panelBg = "rgba(255,255,255,0.92)";
+  const border = "1px solid rgba(0,0,0,0.08)";
+  const textMuted = "rgba(30,50,70,0.55)";
+
+  const toggleButton = (
     <Paper
       elevation={0}
       sx={{
         position: "absolute",
-        top: { xs: 86, md: 58 },
+        top: 180,
+        left: isOpen ? 24 + PANEL_WIDTH : 0,
+        zIndex: 15,
+        width: 28,
+        height: 56,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "0 10px 10px 0",
+        border: border,
+        borderLeft: "none",
+        background: panelBg,
+        backdropFilter: "blur(14px)",
+        cursor: "pointer",
+        transition: "left 0.3s ease",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
+      }}
+      onClick={() => setIsOpen((v) => !v)}
+    >
+      <Typography sx={{ color: "#1565c0", fontSize: "1rem", userSelect: "none", lineHeight: 1 }}>
+        {isOpen ? "⟨" : "⟩"}
+      </Typography>
+    </Paper>
+  );
+
+  const emptyState = (
+    <Stack spacing={2.5} alignItems="center" sx={{ py: 4, px: 1 }}>
+      <Typography variant="h6" sx={{ color: "#152433", fontWeight: 600, textAlign: "center" }}>
+        Welcome to TyphoonAI
+      </Typography>
+      <Typography variant="body2" sx={{ color: textMuted, textAlign: "center", lineHeight: 1.8 }}>
+        Upload typhoon observation data to start forecasting.
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={loadingPrediction}
+        sx={{ px: 3, mt: 1 }}
+      >
+        Upload JSON
+      </Button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        hidden
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (!file) return;
+          if (!file.name.toLowerCase().endsWith(".json")) return;
+          onUploadFile(file);
+          event.target.value = "";
+        }}
+      />
+    </Stack>
+  );
+
+  const dataState = (
+    <Stack spacing={1.8}>
+      {/* Upload row */}
+      <Stack spacing={1}>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={loadingPrediction}
+          sx={{ fontSize: "0.76rem" }}
+        >
+          Upload JSON
+        </Button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json"
+          hidden
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            if (!file.name.toLowerCase().endsWith(".json")) return;
+            onUploadFile(file);
+            event.target.value = "";
+          }}
+        />
+        <Typography variant="caption" sx={{ color: textMuted, fontSize: "0.65rem" }}>
+          Source: {activeSourceName}
+        </Typography>
+      </Stack>
+
+      {/* Storm card */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 1.5,
+          borderRadius: 2,
+          border: border,
+          background: "rgba(240, 244, 250, 0.5)",
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
+          <Box>
+            <Typography sx={{ fontSize: "1.3rem", fontWeight: 700, color: "#d47400", lineHeight: 1.2 }}>
+              {stormName ?? "Typhoon"}
+            </Typography>
+            <Typography variant="caption" sx={{ color: textMuted }}>
+              ID: {stormId ?? "--"}
+            </Typography>
+          </Box>
+          <Chip
+            label={`${forecastSteps ?? "--"} steps`}
+            size="small"
+            sx={{
+              backgroundColor: "rgba(212, 116, 0, 0.08)",
+              color: "#d47400",
+              border: "1px solid rgba(212, 116, 0, 0.18)",
+              fontSize: "0.68rem",
+              fontWeight: 600,
+            }}
+          />
+        </Stack>
+        <Stack direction="row" spacing={0.8} useFlexGap flexWrap="wrap" sx={{ mt: 1.2 }}>
+          <Chip label={`Obs ${observedTrack.length}`} size="small" variant="outlined" sx={{ fontSize: "0.66rem", borderColor: "rgba(0,0,0,0.12)" }} />
+          <Chip label={`Pred ${prediction?.predictedTrack?.length ?? 0}`} size="small" variant="outlined" sx={{ fontSize: "0.66rem", borderColor: "rgba(0,0,0,0.12)" }} />
+          <Chip label={`Wind ${prediction?.summary?.max_wind_speed ?? "--"} m/s`} size="small" variant="outlined" sx={{ fontSize: "0.66rem", borderColor: "rgba(0,0,0,0.12)" }} />
+          <Chip label={`Prs ${prediction?.summary?.min_pressure ?? "--"} hPa`} size="small" variant="outlined" sx={{ fontSize: "0.66rem", borderColor: "rgba(0,0,0,0.12)" }} />
+        </Stack>
+      </Paper>
+
+      {/* Observation table */}
+      {observedTrack.length > 0 ? (
+        <Box>
+          <Typography variant="overline" sx={{ color: textMuted, letterSpacing: "0.1em", fontSize: "0.62rem" }}>
+            Observations
+          </Typography>
+          <TableContainer
+            sx={{
+              mt: 0.6,
+              borderRadius: 1.5,
+              border: border,
+              background: "rgba(250, 251, 253, 0.7)",
+              maxHeight: 180,
+              "&::-webkit-scrollbar": { width: 4 },
+              "&::-webkit-scrollbar-thumb": { backgroundColor: "rgba(0,0,0,0.12)", borderRadius: 4 },
+            }}
+          >
+            <Table size="small" stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {["#", "Lng", "Lat", "Wind", "Prs", "Time"].map((h) => (
+                    <TableCell
+                      key={h}
+                      sx={{
+                        py: 0.5,
+                        color: textMuted,
+                        fontSize: "0.62rem",
+                        fontWeight: 600,
+                        borderBottom: "1px solid rgba(0,0,0,0.06)",
+                        background: "rgba(248, 250, 252, 0.95)",
+                      }}
+                    >
+                      {h}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {observedTrack.map((point, index) => {
+                  const isActive = activeTrackPoint?.timestamp === point.timestamp;
+                  return (
+                    <TableRow
+                      key={index}
+                      sx={{
+                        "&:hover": { background: "rgba(21, 101, 192, 0.04)" },
+                        background: isActive ? "rgba(21, 101, 192, 0.08)" : "transparent",
+                      }}
+                    >
+                      <TableCell sx={{ py: 0.35, color: textMuted, fontSize: "0.62rem", borderBottom: "none" }}>
+                        {index + 1}
+                      </TableCell>
+                      <TableCell sx={{ py: 0.35, color: "#152433", fontSize: "0.68rem", borderBottom: "none" }}>
+                        {point.lng}
+                      </TableCell>
+                      <TableCell sx={{ py: 0.35, color: "#152433", fontSize: "0.68rem", borderBottom: "none" }}>
+                        {point.lat}
+                      </TableCell>
+                      <TableCell sx={{ py: 0.35, color: "#d47400", fontSize: "0.68rem", fontWeight: isActive ? 600 : 400, borderBottom: "none" }}>
+                        {point.wind_speed ?? "--"}
+                      </TableCell>
+                      <TableCell sx={{ py: 0.35, color: "#1565c0", fontSize: "0.68rem", fontWeight: isActive ? 600 : 400, borderBottom: "none" }}>
+                        {point.pressure ?? "--"}
+                      </TableCell>
+                      <TableCell sx={{ py: 0.35, color: textMuted, fontSize: "0.6rem", borderBottom: "none", whiteSpace: "nowrap" }}>
+                        {point.timestamp ? new Date(point.timestamp).toLocaleString([], { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "--"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      ) : null}
+
+      {/* Active time */}
+      <Box
+        sx={{
+          borderRadius: 2,
+          p: 1.2,
+          border: border,
+          background: "rgba(248, 250, 252, 0.6)",
+        }}
+      >
+        <Typography variant="body2" sx={{ color: "#152433", fontWeight: 600, fontSize: "0.78rem" }}>
+          {activeTrackPoint
+            ? new Date(activeTrackPoint.timestamp).toLocaleString()
+            : "Waiting for track"}
+        </Typography>
+        <Typography variant="caption" sx={{ display: "block", mt: 0.5, color: textMuted }}>
+          {activeTrackPoint
+            ? `${activeTrackPoint.source}  |  ${activeTrackPoint.lng}°E  ${activeTrackPoint.lat}°N`
+            : "Drag the timeline to inspect points"}
+        </Typography>
+      </Box>
+    </Stack>
+  );
+
+  const sidebar = (
+    <Paper
+      elevation={0}
+      sx={{
+        position: "absolute",
+        top: { xs: 100, md: 100 },
         left: { xs: 16, md: 24 },
-        width: { xs: "calc(100% - 32px)", md: 344 },
-        maxHeight: { xs: "calc(100vh - 180px)", md: "calc(100vh - 108px)" },
+        width: { xs: "calc(100% - 32px)", md: PANEL_WIDTH },
+        maxHeight: { xs: "calc(100vh - 180px)", md: "calc(100vh - 140px)" },
         overflow: "auto",
         p: 1.8,
         borderRadius: 3,
-        border: "1px solid rgba(108, 136, 181, 0.18)",
-        background: "linear-gradient(180deg, rgba(8, 15, 27, 0.92), rgba(6, 12, 22, 0.98))",
+        border: border,
+        background: panelBg,
         backdropFilter: "blur(18px)",
+        boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
         zIndex: 14,
+        transition: "opacity 0.3s ease, transform 0.3s ease",
+        "&::-webkit-scrollbar": { width: 4 },
+        "&::-webkit-scrollbar-thumb": { backgroundColor: "rgba(0,0,0,0.1)", borderRadius: 4 },
       }}
     >
-      <Stack spacing={2}>
-        <UploadPanel
-          activeSourceName={activeSourceName}
-          onLoadSample={onLoadSample}
-          onUploadFile={onUploadFile}
-          loadingPrediction={loadingPrediction}
-        />
-
-        {error ? <Alert severity="error">{error}</Alert> : null}
-
-        <Stack spacing={1.2}>
-          <Typography variant="overline" sx={{ color: "rgba(173, 191, 223, 0.78)", letterSpacing: "0.16em" }}>
-            Storm Overview
+      <Stack spacing={1.5}>
+        {/* Header */}
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Typography variant="overline" sx={{ color: "#1565c0", letterSpacing: "0.14em", fontSize: "0.68rem", fontWeight: 600 }}>
+            Typhoon Data
           </Typography>
-          <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-            <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: "#f0c648", lineHeight: 1.05 }}>
-                {prediction?.stormName ?? "Typhoon"}
-              </Typography>
-              <Typography variant="body2" sx={{ color: "rgba(213, 225, 244, 0.62)", mt: 0.5 }}>
-                ID: {prediction?.stormId ?? "--"}
-              </Typography>
-            </Box>
-            <Chip
-              label={`${prediction?.forecastSteps ?? "--"} steps`}
-              sx={{
-                backgroundColor: "rgba(240, 198, 72, 0.12)",
-                color: "#f3cf62",
-                border: "1px solid rgba(240, 198, 72, 0.24)",
-              }}
-            />
-          </Stack>
+          <IconButton onClick={() => setIsOpen(false)} size="small" sx={{ color: textMuted, p: 0.3 }}>
+            <Typography sx={{ fontSize: "0.9rem" }}>{'✕'}</Typography>
+          </IconButton>
         </Stack>
 
-        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-          <Chip label={`Obs ${prediction?.observedTrack.length ?? 0}`} variant="outlined" />
-          <Chip label={`Pred ${prediction?.predictedTrack.length ?? 0}`} variant="outlined" />
-          <Chip label={`Base ${prediction?.baselineTrack.length ?? 0}`} variant="outlined" />
-          <Chip label={`Truth ${prediction?.actualTrack.length ?? 0}`} variant="outlined" />
-          <Chip label={`Wind ${prediction?.summary?.max_wind_speed ?? "--"} m/s`} variant="outlined" />
-          <Chip label={`Pressure ${prediction?.summary?.min_pressure ?? "--"} hPa`} variant="outlined" />
-        </Stack>
+        {error ? (
+          <Typography variant="body2" sx={{ color: "#d32f2f", fontSize: "0.73rem", px: 0.5 }}>
+            {error}
+          </Typography>
+        ) : null}
 
-        <Stack spacing={1}>
-          <Typography variant="overline" sx={{ color: "rgba(173, 191, 223, 0.78)", letterSpacing: "0.16em" }}>
-            Model Diagnostics
-          </Typography>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            <Chip label={`Model ${summary.model_name ?? prediction?.modelName ?? "--"}`} variant="outlined" />
-            <Chip label={`Mode ${summary.inference_mode ?? "--"}`} variant="outlined" />
-            <Chip label={`Phys Score ${formatMetric(summary.physics_consistency_score, 3)}`} variant="outlined" />
-            <Chip label={`Data Loss ${formatMetric(losses.data_loss, 3)}`} variant="outlined" />
-            <Chip label={`Physics Loss ${formatMetric(losses.physics_loss, 3)}`} variant="outlined" />
-            <Chip label={`Track MAE ${formatMetric(metrics.track_mae_km, 2, " km")}`} variant="outlined" />
-            <Chip label={`Final Err ${formatMetric(metrics.final_position_error_km, 2, " km")}`} variant="outlined" />
-            <Chip label={`Base MAE ${formatMetric(metrics.baseline_track_mae_km, 2, " km")}`} variant="outlined" />
-            <Chip label={`PINN-Base ${formatMetric(metrics.baseline_vs_pinn_mean_km, 2, " km")}`} variant="outlined" />
-            <Chip label={`Wind MAE ${formatMetric(metrics.wind_mae_mps, 2, " m/s")}`} variant="outlined" />
-            <Chip label={`Pressure MAE ${formatMetric(metrics.pressure_mae_hpa, 2, " hPa")}`} variant="outlined" />
-          </Stack>
-        </Stack>
-
-        <Box>
-          <Typography variant="overline" sx={{ color: activeStyle.accent, letterSpacing: "0.16em" }}>
-            Layers
-          </Typography>
-          <ToggleButtonGroup
-            color="primary"
-            exclusive
-            fullWidth
-            value={weatherField}
-            onChange={(_, value) => {
-              if (value) {
-                setWeatherField(value);
-              }
-            }}
-            sx={{
-              mt: 1,
-              "& .MuiToggleButton-root": {
-                borderColor: "rgba(115, 152, 209, 0.14)",
-                color: "rgba(224, 232, 247, 0.72)",
-                py: 1,
-                backgroundColor: "rgba(13, 21, 37, 0.78)",
-              },
-              "& .Mui-selected": {
-                color: "#04111c",
-                backgroundColor: "#2aa7ff !important",
-              },
-            }}
-          >
-            <ToggleButton value="rain">Rain</ToggleButton>
-            <ToggleButton value="wind">Wind</ToggleButton>
-            <ToggleButton value="pressure">Pressure</ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
-
-        <Box
-          sx={{
-            borderRadius: 2.5,
-            p: 1.5,
-            border: "1px solid rgba(126, 168, 226, 0.12)",
-            background: "rgba(10, 18, 31, 0.84)",
-          }}
-        >
-          <Typography variant="body2" sx={{ color: "#edf4ff", fontWeight: 600 }}>
-            {activeTrackPoint ? `Active Time: ${new Date(activeTrackPoint.timestamp).toLocaleString()}` : "Waiting for track"}
-          </Typography>
-          <Typography variant="body2" sx={{ color: "rgba(216, 229, 248, 0.68)", mt: 0.8, lineHeight: 1.65 }}>
-            {weatherMeta?.description ?? "Waiting for weather field response"}
-          </Typography>
-          <Typography variant="caption" sx={{ display: "block", mt: 0.8, color: "rgba(216, 229, 248, 0.54)" }}>
-            Domain 120.5E-122.5E / 30.5N-32.0N | Grid{" "}
-            {weatherMeta ? `${weatherMeta.grid_shape.lat} x ${weatherMeta.grid_shape.lng}` : "--"}
-          </Typography>
-        </Box>
-
-        <Stack spacing={1}>
-          <Typography variant="overline" sx={{ color: "rgba(173, 191, 223, 0.78)", letterSpacing: "0.16em" }}>
-            Weather Metrics
-          </Typography>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            <Chip label={`${activeStyle.label} Min ${weatherSummary.min} ${activeStyle.unit}`} variant="outlined" />
-            <Chip label={`${activeStyle.label} Mean ${weatherSummary.mean} ${activeStyle.unit}`} variant="outlined" />
-            <Chip label={`${activeStyle.label} Max ${weatherSummary.max} ${activeStyle.unit}`} variant="outlined" />
-          </Stack>
-        </Stack>
+        {prediction ? dataState : emptyState}
       </Stack>
     </Paper>
+  );
+
+  return (
+    <>
+      {isOpen ? sidebar : toggleButton}
+      {!isOpen ? toggleButton : null}
+    </>
   );
 }
 

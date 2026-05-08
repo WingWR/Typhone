@@ -1,19 +1,14 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Alert, Box, Snackbar, Stack, Typography } from "@mui/material";
 import ForecastSidebar from "./components/ForecastSidebar";
 import MapLegend from "./components/MapLegend";
 import MapScene from "./components/MapScene";
 import TimelineBar from "./components/TimelineBar";
-import { WEATHER_STYLES } from "./constants/map";
 import { useTyphoonVisualizer } from "./hooks/useTyphoonVisualizer";
 
 function App() {
   const {
     prediction,
-    weatherField,
-    setWeatherField,
-    weatherPoints,
-    weatherMeta,
-    weatherSummary,
     loadingPrediction,
     error,
     currentTime,
@@ -23,9 +18,18 @@ function App() {
     timeRange,
     activeTrackPoint,
     activeSourceName,
-    loadSampleForecast,
+    hasPrediction,
     uploadTyphoonJson,
   } = useTyphoonVisualizer();
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  useEffect(() => {
+    if (error) {
+      setSnackbarMessage(error);
+      setSnackbarOpen(true);
+    }
+  }, [error]);
 
   return (
     <Box sx={{ minHeight: "100vh", position: "relative", overflow: "hidden" }}>
@@ -33,10 +37,11 @@ function App() {
         sx={{
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(circle at top left, rgba(35, 94, 150, 0.22), transparent 28%), radial-gradient(circle at bottom right, rgba(4, 197, 255, 0.14), transparent 24%), linear-gradient(180deg, #07101c 0%, #04070e 100%)",
+          background: "linear-gradient(180deg, #e8edf2 0%, #d5dce3 100%)",
         }}
       />
+
+      {/* Header */}
       <Stack
         direction="row"
         justifyContent="space-between"
@@ -51,24 +56,27 @@ function App() {
           px: { xs: 0.5, md: 1.5 },
           py: 1.5,
           borderRadius: 3,
-          border: "1px solid rgba(115, 143, 184, 0.14)",
-          background: "rgba(4, 10, 19, 0.72)",
+          border: "1px solid rgba(0,0,0,0.08)",
+          background: "rgba(255,255,255,0.9)",
           backdropFilter: "blur(14px)",
+          boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
         }}
       >
         <Box>
-          <Typography variant="h5" sx={{ color: "#f9fbff", fontWeight: 700 }}>
-            TyphoonAI <Box component="span" sx={{ color: "#1ca2ff" }}>|</Box> Shanghai Forecast
+          <Typography variant="h5" sx={{ color: "#152433", fontWeight: 700 }}>
+            TyphoonAI <Box component="span" sx={{ color: "#1565c0" }}>|</Box> Shanghai Forecast
           </Typography>
-          <Typography variant="body2" sx={{ color: "rgba(217, 230, 249, 0.64)", mt: 0.35 }}>
+          <Typography variant="body2" sx={{ color: "rgba(30,50,70,0.55)", mt: 0.35 }}>
             Upload observations and replay typhoon motion continuously on the map
           </Typography>
         </Box>
-        <Stack direction="row" spacing={2.5} sx={{ display: { xs: "none", md: "flex" }, color: "rgba(214, 224, 241, 0.72)" }}>
+        <Stack direction="row" spacing={2.5} sx={{ display: { xs: "none", md: "flex" }, color: "rgba(30,50,70,0.55)" }}>
           <Typography variant="body2">Model: PINN-v1</Typography>
           <Typography variant="body2">Region: East China</Typography>
         </Stack>
       </Stack>
+
+      {/* Map */}
       <MapScene
         activeTrackPoint={activeTrackPoint}
         actualTrack={prediction?.actualTrack ?? []}
@@ -76,32 +84,50 @@ function App() {
         combinedTrack={prediction?.combinedTrack ?? []}
         currentTime={currentTime}
         observedTrack={prediction?.observedTrack ?? []}
-        weatherField={weatherField}
-        weatherPoints={weatherPoints}
-        weatherUnit={WEATHER_STYLES[weatherField].unit}
       />
+
+      {/* Sidebar */}
       <ForecastSidebar
         activeSourceName={activeSourceName}
         activeTrackPoint={activeTrackPoint}
         error={error}
         loadingPrediction={loadingPrediction}
-        onLoadSample={loadSampleForecast}
         onUploadFile={uploadTyphoonJson}
         prediction={prediction}
-        setWeatherField={setWeatherField}
-        weatherField={weatherField}
-        weatherMeta={weatherMeta}
-        weatherSummary={weatherSummary}
       />
-      <MapLegend />
-      <TimelineBar
-        currentTime={currentTime}
-        manualControl={manualControl}
-        setCurrentTime={setCurrentTime}
-        setManualControl={setManualControl}
-        timeRange={timeRange}
-        track={prediction?.combinedTrack ?? []}
-      />
+
+      {/* Legend */}
+      {hasPrediction ? <MapLegend activeTrackPoint={activeTrackPoint} prediction={prediction} /> : null}
+
+      {/* Timeline */}
+      {hasPrediction ? (
+        <TimelineBar
+          currentTime={currentTime}
+          manualControl={manualControl}
+          setCurrentTime={setCurrentTime}
+          setManualControl={setManualControl}
+          timeRange={timeRange}
+          track={prediction?.combinedTrack ?? []}
+        />
+      ) : null}
+
+      {/* Error snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        sx={{ bottom: { xs: 120, md: 100 } }}
+      >
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={() => setSnackbarOpen(false)}
+          sx={{ borderRadius: 2 }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

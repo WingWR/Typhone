@@ -44,13 +44,6 @@ export function normalizePredictionResponse(payload) {
   };
 }
 
-export function normalizeWeatherPoints(points) {
-  return points.map(([lng, lat, value]) => ({
-    position: [lng, lat],
-    value,
-  }));
-}
-
 export function buildTripData(track) {
   if (!track.length) {
     return [];
@@ -62,28 +55,6 @@ export function buildTripData(track) {
       timestamps: track.map((point) => point.timeValue),
     },
   ];
-}
-
-export function computeWeatherSummary(points) {
-  if (!points.length) {
-    return { min: "0.0", max: "0.0", mean: "0.0" };
-  }
-
-  let min = Number.POSITIVE_INFINITY;
-  let max = Number.NEGATIVE_INFINITY;
-  let total = 0;
-
-  for (const point of points) {
-    min = Math.min(min, point.value);
-    max = Math.max(max, point.value);
-    total += point.value;
-  }
-
-  return {
-    min: min.toFixed(1),
-    max: max.toFixed(1),
-    mean: (total / points.length).toFixed(1),
-  };
 }
 
 export function computeTimeRange(track) {
