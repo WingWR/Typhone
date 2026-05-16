@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <text x="480" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700">TyphoonAI PINN v2 Training Process</text>
+  <text x="480" y="54" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#4b5563">2016-2025 CHBST merged dataset, log-scaled loss curve</text>
+
+  <line x1="80" y1="460" x2="920" y2="460" stroke="#111827"/>
+  <line x1="80" y1="60" x2="80" y2="460" stroke="#111827"/>
+
+  <line x1="80" y1="110" x2="920" y2="110" stroke="#e5e7eb"/>
+  <text x="68" y="114" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">1.0</text>
+  <line x1="80" y1="276" x2="920" y2="276" stroke="#e5e7eb"/>
+  <text x="68" y="280" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">0.1</text>
+  <line x1="80" y1="443" x2="920" y2="443" stroke="#e5e7eb"/>
+  <text x="68" y="447" text-anchor="end" font-family="Arial" font-size="12" fill="#374151">0.01</text>
+
+  <line x1="80" y1="60" x2="80" y2="460" stroke="#f3f4f6"/>
+  <text x="80" y="486" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">1</text>
+  <line x1="266" y1="60" x2="266" y2="460" stroke="#f3f4f6"/>
+  <text x="266" y="486" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">50</text>
+  <line x1="456" y1="60" x2="456" y2="460" stroke="#f3f4f6"/>
+  <text x="456" y="486" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">100</text>
+  <line x1="710" y1="60" x2="710" y2="460" stroke="#f3f4f6"/>
+  <text x="710" y="486" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">167</text>
+  <line x1="920" y1="60" x2="920" y2="460" stroke="#f3f4f6"/>
+  <text x="920" y="486" text-anchor="middle" font-family="Arial" font-size="12" fill="#374151">217</text>
+
+  <text x="500" y="520" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">Epoch</text>
+  <text transform="translate(24,270) rotate(-90)" text-anchor="middle" font-family="Arial" font-size="14" fill="#111827">Loss (log scale)</text>
+
+  <line x1="710" y1="60" x2="710" y2="460" stroke="#ef4444" stroke-dasharray="6,5"/>
+  <text x="718" y="78" font-family="Arial" font-size="12" fill="#ef4444">best epoch 167, val_loss=0.01022890</text>
+
+  <polyline points="80,72 95,262 266,380 456,403 710,423 920,425" fill="none" stroke="#1f77b4" stroke-width="3"/>
+  <polyline points="80,198 95,276 266,396 456,407 710,442 920,429" fill="none" stroke="#d62728" stroke-width="3"/>
+
+  <circle cx="710" cy="442" r="5" fill="#d62728"/>
+  <circle cx="920" cy="429" r="5" fill="#d62728"/>
+  <circle cx="920" cy="425" r="5" fill="#1f77b4"/>
+
+  <rect x="640" y="100" width="255" height="104" rx="4" fill="#ffffff" stroke="#d1d5db"/>
+  <line x1="662" y1="128" x2="702" y2="128" stroke="#1f77b4" stroke-width="3"/>
+  <text x="714" y="132" font-family="Arial" font-size="13" fill="#111827">train loss</text>
+  <line x1="662" y1="154" x2="702" y2="154" stroke="#d62728" stroke-width="3"/>
+  <text x="714" y="158" font-family="Arial" font-size="13" fill="#111827">validation loss</text>
+  <text x="662" y="184" font-family="Arial" font-size="12" fill="#374151">test loss = 0.01139998</text>
+
+  <text x="94" y="250" font-family="Arial" font-size="11" fill="#1f77b4">epoch 5 train=0.1220</text>
+  <text x="718" y="454" font-family="Arial" font-size="11" fill="#d62728">val=0.0102</text>
+</svg>
