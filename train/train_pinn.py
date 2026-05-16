@@ -31,31 +31,130 @@ from backend.utils.physics_engine import EARTH_ANGULAR_VELOCITY, EARTH_RADIUS_M,
 
 LOSS_PART_NAMES = (
     "data_loss",
-    "velocity_loss",
+    "velocity_consistency_loss",
+    "velocity_supervised_loss",
     "inertia_loss",
     "coriolis_loss",
     "wind_pressure_loss",
     "nearshore_decay_loss",
 )
+SUPPORTED_DATASET_SUFFIXES = (".csv", ".json", ".jsonl")
 DEFAULT_OUTPUT_PATH = (
     Path(__file__).resolve().parent.parent / "backend" / "models" / "weights" / "typhoon_pinn_v1.pth"
 )
 
 
+def _normalize_dataframe_columns(frame: pd.DataFrame) -> pd.DataFrame:
+    normalized = frame.copy()
+    normalized.columns = [str(column).strip().lstrip("\ufeff") for column in normalized.columns]
+    return normalized
+
+
+def _validate_required_columns(frame: pd.DataFrame) -> None:
+    columns = set(frame.columns)
+    missing = []
+    if "storm_id" not in columns:
+        missing.append("storm_id")
+    if "t_hours" not in columns and "timestamp" not in columns:
+        missing.append("t_hours or timestamp")
+    for column in ["lng", "lat", "wind_speed", "pressure"]:
+        if column not in columns:
+            missing.append(column)
+    if missing:
+        raise ValueError(f"Merged dataset is missing required columns: {', '.join(missing)}")
+
+
+def _read_dataset_file(file_path: Path) -> pd.DataFrame:
+    suffix = file_path.suffix.lower()
+    if suffix == ".csv":
+        return pd.read_csv(file_path, encoding="utf-8-sig")
+    if suffix == ".json":
+        return pd.read_json(file_path)
+    if suffix == ".jsonl":
+        return pd.read_json(file_path, lines=True)
+    raise ValueError(f"Unsupported dataset file type: {file_path.suffix}")
+
+
 def load_dataset(dataset_path: str | Path | None = None) -> pd.DataFrame:
-    """Load typhoon samples with lng, lat, time, wind speed and pressure columns."""
+    """Load a single dataset file or merge multiple supported files from one directory."""
     if dataset_path is None:
-        return _build_synthetic_dataset()
+        synthetic = _build_synthetic_dataset()
+        synthetic.attrs["dataset_files"] = [
+            {
+                "path": "<synthetic>",
+                "rows": int(len(synthetic)),
+                "success": True,
+                "error": "",
+            }
+        ]
+        synthetic.attrs["total_raw_rows"] = int(len(synthetic))
+        return synthetic
 
     path = Path(dataset_path)
-    if path.suffix.lower() == ".csv":
-        return pd.read_csv(path, encoding="utf-8-sig")
-    if path.suffix.lower() == ".json":
-        return pd.read_json(path)
-    if path.suffix.lower() == ".jsonl":
-        return pd.read_json(path, lines=True)
+    if path.is_file():
+        frame = _normalize_dataframe_columns(_read_dataset_file(path))
+        _validate_required_columns(frame)
+        frame.attrs["dataset_files"] = [
+            {
+                "path": str(path),
+                "rows": int(len(frame)),
+                "success": True,
+                "error": "",
+            }
+        ]
+        frame.attrs["total_raw_rows"] = int(len(frame))
+        return frame
 
-    raise ValueError("Dataset must be a .csv, .json, or .jsonl file.")
+    if path.is_dir():
+        candidate_files = sorted(
+            file_path
+            for file_path in path.iterdir()
+            if file_path.is_file() and file_path.suffix.lower() in SUPPORTED_DATASET_SUFFIXES
+        )
+        if not candidate_files:
+            raise ValueError(
+                f"No supported dataset files were found in directory: {path}. "
+                f"Expected one of: {', '.join(SUPPORTED_DATASET_SUFFIXES)}"
+            )
+
+        frames: list[pd.DataFrame] = []
+        dataset_files: list[dict[str, Any]] = []
+        for file_path in candidate_files:
+            try:
+                frame = _normalize_dataframe_columns(_read_dataset_file(file_path))
+                frames.append(frame)
+                dataset_files.append(
+                    {
+                        "path": str(file_path),
+                        "rows": int(len(frame)),
+                        "success": True,
+                        "error": "",
+                    }
+                )
+            except Exception as error:
+                warning = f"Warning: failed to load dataset file '{file_path}': {error}"
+                print(warning)
+                dataset_files.append(
+                    {
+                        "path": str(file_path),
+                        "rows": 0,
+                        "success": False,
+                        "error": str(error),
+                    }
+                )
+
+        if not frames:
+            raise ValueError(f"Failed to load any supported dataset files from directory: {path}")
+
+        merged = pd.concat(frames, ignore_index=True, sort=False)
+        _validate_required_columns(merged)
+        merged.attrs["dataset_files"] = dataset_files
+        merged.attrs["total_raw_rows"] = int(len(merged))
+        return merged
+
+    raise ValueError(
+        f"Dataset path does not exist or is not a supported file/directory: {path}"
+    )
 
 
 def _build_synthetic_dataset() -> pd.DataFrame:
@@ -100,6 +199,10 @@ def _prepare_dataframe(raw: pd.DataFrame) -> pd.DataFrame:
             raise ValueError(f"Dataset is missing required column `{column}`.")
         frame[column] = pd.to_numeric(frame[column], errors="coerce")
 
+    drop_columns = [column for column in ["source_file", "storm_name"] if column in frame.columns]
+    if drop_columns:
+        frame = frame.drop(columns=drop_columns)
+
     frame["t_hours"] = pd.to_numeric(frame["t_hours"], errors="coerce")
     frame = frame.dropna(subset=FEATURE_COLUMNS)
     frame = frame.drop_duplicates(subset=["storm_id", "t_hours"], keep="last")
@@ -132,29 +235,46 @@ def _split_frame_by_storm(
     frame: pd.DataFrame,
     *,
     val_ratio: float,
+    test_ratio: float = 0.0,
     seed: int,
-) -> tuple[pd.DataFrame, pd.DataFrame, list[str], list[str]]:
-    if val_ratio <= 0:
-        train_ids = frame["storm_id"].drop_duplicates().tolist()
-        empty = frame.iloc[0:0].copy()
-        return frame.copy(), empty, train_ids, []
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, list[str], list[str], list[str]]:
+    if val_ratio < 0 or test_ratio < 0:
+        raise ValueError("val_ratio and test_ratio must be non-negative.")
 
     storm_ids = frame["storm_id"].drop_duplicates().tolist()
     if len(storm_ids) < 2:
         train_ids = storm_ids
         empty = frame.iloc[0:0].copy()
-        return frame.copy(), empty, train_ids, []
+        return frame.copy(), empty, empty, train_ids, [], []
 
     shuffled_ids = storm_ids.copy()
     np.random.default_rng(seed).shuffle(shuffled_ids)
-    val_count = int(round(len(shuffled_ids) * val_ratio))
-    val_count = min(max(val_count, 1), len(shuffled_ids) - 1)
-    val_ids = sorted(shuffled_ids[:val_count])
-    val_id_set = set(val_ids)
-    train_ids = sorted([storm_id for storm_id in shuffled_ids if storm_id not in val_id_set])
+
+    remaining_ids = shuffled_ids
+    test_ids: list[str] = []
+    if test_ratio > 0 and len(shuffled_ids) > 1:
+        max_test_count = len(shuffled_ids) - 1
+        if val_ratio > 0 and len(shuffled_ids) > 2:
+            max_test_count = len(shuffled_ids) - 2
+        test_count = int(round(len(shuffled_ids) * test_ratio))
+        test_count = min(max(test_count, 1), max_test_count)
+        test_ids = sorted(shuffled_ids[:test_count])
+        remaining_ids = shuffled_ids[test_count:]
+
+    if val_ratio <= 0 or len(remaining_ids) < 2:
+        val_ids = []
+        train_ids = sorted(remaining_ids)
+    else:
+        val_count = int(round(len(remaining_ids) * val_ratio))
+        val_count = min(max(val_count, 1), len(remaining_ids) - 1)
+        val_ids = sorted(remaining_ids[:val_count])
+        val_id_set = set(val_ids)
+        train_ids = sorted([storm_id for storm_id in remaining_ids if storm_id not in val_id_set])
+
     train_frame = frame[frame["storm_id"].isin(train_ids)].copy()
     val_frame = frame[frame["storm_id"].isin(val_ids)].copy()
-    return train_frame, val_frame, train_ids, val_ids
+    test_frame = frame[frame["storm_id"].isin(test_ids)].copy()
+    return train_frame, val_frame, test_frame, train_ids, val_ids, test_ids
 
 
 def _summarize_frame(frame: pd.DataFrame) -> dict[str, Any]:
@@ -199,6 +319,42 @@ def _summarize_frame(frame: pd.DataFrame) -> dict[str, Any]:
 
 def _derive_report_path(output_path: str | Path) -> Path:
     return Path(output_path).with_suffix(".summary.json")
+
+
+def _build_loss_weight_map(
+    *,
+    velocity_weight: float,
+    velocity_supervised_weight: float,
+    inertia_weight: float,
+    coriolis_weight: float,
+    wind_pressure_weight: float,
+    nearshore_weight: float,
+) -> dict[str, float]:
+    return {
+        "data_loss": 1.0,
+        "velocity_consistency_loss": velocity_weight,
+        "velocity_supervised_loss": velocity_supervised_weight,
+        "inertia_loss": inertia_weight,
+        "coriolis_loss": coriolis_weight,
+        "wind_pressure_loss": wind_pressure_weight,
+        "nearshore_decay_loss": nearshore_weight,
+    }
+
+
+def _attach_loss_contributions(metrics: dict[str, Any], loss_weights: dict[str, float]) -> dict[str, Any]:
+    contribution_names = {
+        "data_loss": "data_contrib",
+        "velocity_consistency_loss": "velocity_consistency_contrib",
+        "velocity_supervised_loss": "velocity_supervised_contrib",
+        "inertia_loss": "inertia_contrib",
+        "coriolis_loss": "coriolis_contrib",
+        "wind_pressure_loss": "wind_pressure_contrib",
+        "nearshore_decay_loss": "nearshore_contrib",
+    }
+    for loss_name, contribution_name in contribution_names.items():
+        if loss_name in metrics:
+            metrics[contribution_name] = float(metrics[loss_name]) * float(loss_weights[loss_name])
+    return metrics
 
 
 def _build_checkpoint_payload(
@@ -285,6 +441,7 @@ class TyphoonSequenceDataset(Dataset):
                     {
                         "features": normalized[index - sequence_length : index].reshape(-1),
                         "target_state": normalized[index, 1:5],
+                        "target_state_raw": raw_values[index, 1:5],
                         "last_state_raw": raw_values[index - 1, 1:5],
                         "previous_state_raw": raw_values[previous_index, 1:5],
                         "dt_hours": max(raw_values[index, 0] - raw_values[index - 1, 0], 1e-3),
@@ -303,6 +460,7 @@ class TyphoonSequenceDataset(Dataset):
         return {
             "features": torch.tensor(sample["features"], dtype=torch.float32),
             "target_state": torch.tensor(sample["target_state"], dtype=torch.float32),
+            "target_state_raw": torch.tensor(sample["target_state_raw"], dtype=torch.float32),
             "last_state_raw": torch.tensor(sample["last_state_raw"], dtype=torch.float32),
             "previous_state_raw": torch.tensor(sample["previous_state_raw"], dtype=torch.float32),
             "dt_hours": torch.tensor(sample["dt_hours"], dtype=torch.float32),
@@ -328,6 +486,25 @@ def _coastline_lng_torch(lat: torch.Tensor) -> torch.Tensor:
     return 120.35 + 0.19 * (lat - 26.0) + 0.08 * torch.sin((lat - 26.0) * 1.6)
 
 
+def _haversine_distance_km_torch(
+    lng0: torch.Tensor,
+    lat0: torch.Tensor,
+    lng1: torch.Tensor,
+    lat1: torch.Tensor,
+) -> torch.Tensor:
+    """Compute great-circle distance in kilometers for batched lon/lat pairs."""
+    lng0_rad = torch.deg2rad(lng0)
+    lat0_rad = torch.deg2rad(lat0)
+    lng1_rad = torch.deg2rad(lng1)
+    lat1_rad = torch.deg2rad(lat1)
+    dlon = lng1_rad - lng0_rad
+    dlat = lat1_rad - lat0_rad
+    a = torch.sin(dlat * 0.5).pow(2) + torch.cos(lat0_rad) * torch.cos(lat1_rad) * torch.sin(dlon * 0.5).pow(2)
+    a = torch.clamp(a, min=0.0, max=1.0)
+    c = 2.0 * torch.atan2(torch.sqrt(a), torch.sqrt(torch.clamp(1.0 - a, min=1e-12)))
+    return c * (EARTH_RADIUS_M / 1000.0)
+
+
 class PINNLoss(nn.Module):
     """Combined data and physics-informed losses for typhoon motion."""
 
@@ -335,6 +512,7 @@ class PINNLoss(nn.Module):
         self,
         scaler: TensorScaler,
         velocity_weight: float = 1e-3,
+        velocity_supervised_weight: float = 1e-3,
         inertia_weight: float = 1e4,
         coriolis_weight: float = 1e4,
         wind_pressure_weight: float = 0.05,
@@ -343,6 +521,7 @@ class PINNLoss(nn.Module):
         super().__init__()
         self.scaler = scaler
         self.velocity_weight = velocity_weight
+        self.velocity_supervised_weight = velocity_supervised_weight
         self.inertia_weight = inertia_weight
         self.coriolis_weight = coriolis_weight
         self.wind_pressure_weight = wind_pressure_weight
@@ -350,9 +529,15 @@ class PINNLoss(nn.Module):
         self.mse = nn.MSELoss()
 
     def forward(self, prediction: torch.Tensor, batch: dict[str, torch.Tensor]) -> tuple[torch.Tensor, dict[str, float]]:
+        if prediction.ndim != 2 or prediction.shape[1] < 6:
+            raise ValueError(
+                "TyphoonPINN must output at least 6 values per sample: "
+                "[lng, lat, wind_speed, pressure, u_mps, v_mps]."
+            )
         predicted_state = prediction[:, :4]
         predicted_velocity = prediction[:, 4:6]
         target_state = batch["target_state"]
+        target_raw = batch["target_state_raw"]
 
         # Data loss forces the PINN to fit observed typhoon position and intensity.
         data_loss = self.mse(predicted_state, target_state)
@@ -370,6 +555,13 @@ class PINNLoss(nn.Module):
             predicted_raw[:, 1],
             dt_hours,
         )
+        true_velocity = _latlon_velocity_mps_torch(
+            last_raw[:, 0],
+            last_raw[:, 1],
+            target_raw[:, 0],
+            target_raw[:, 1],
+            dt_hours,
+        )
         previous_velocity = _latlon_velocity_mps_torch(
             previous_raw[:, 0],
             previous_raw[:, 1],
@@ -379,7 +571,10 @@ class PINNLoss(nn.Module):
         )
 
         # Velocity consistency encodes dx/dt = v, linking position derivatives to predicted velocity.
-        velocity_loss = self.mse(predicted_velocity, velocity_from_position)
+        velocity_consistency_loss = self.mse(predicted_velocity, velocity_from_position)
+
+        # Velocity supervision anchors the predicted velocity to the true next-step motion.
+        velocity_supervised_loss = self.mse(predicted_velocity, true_velocity)
 
         dt_seconds = torch.clamp(dt_hours * SECONDS_PER_HOUR, min=1e-6).unsqueeze(1)
         acceleration = (predicted_velocity - previous_velocity) / dt_seconds
@@ -415,7 +610,8 @@ class PINNLoss(nn.Module):
 
         total_loss = (
             data_loss
-            + self.velocity_weight * velocity_loss
+            + self.velocity_weight * velocity_consistency_loss
+            + self.velocity_supervised_weight * velocity_supervised_loss
             + self.inertia_weight * inertia_loss
             + self.coriolis_weight * coriolis_loss
             + self.wind_pressure_weight * wind_pressure_loss
@@ -423,7 +619,8 @@ class PINNLoss(nn.Module):
         )
         return total_loss, {
             "data_loss": float(data_loss.detach().cpu()),
-            "velocity_loss": float(velocity_loss.detach().cpu()),
+            "velocity_consistency_loss": float(velocity_consistency_loss.detach().cpu()),
+            "velocity_supervised_loss": float(velocity_supervised_loss.detach().cpu()),
             "inertia_loss": float(inertia_loss.detach().cpu()),
             "coriolis_loss": float(coriolis_loss.detach().cpu()),
             "wind_pressure_loss": float(wind_pressure_loss.detach().cpu()),
@@ -446,6 +643,11 @@ def _run_epoch(
     total_loss = 0.0
     total_parts = _empty_loss_totals()
     total_samples = 0
+    position_error_sum = 0.0
+    position_sq_error_sum = 0.0
+    wind_abs_error_sum = 0.0
+    pressure_abs_error_sum = 0.0
+    position_errors: list[float] = []
 
     for batch in loader:
         batch = _move_batch_to_device(batch, device)
@@ -458,6 +660,16 @@ def _run_epoch(
             prediction = model(batch["features"])
             loss, loss_parts = criterion(prediction, batch)
 
+        predicted_state = prediction[:, :4].detach()
+        predicted_raw = criterion.scaler.denormalize_tensor(predicted_state, STATE_COLUMNS)
+        target_raw = batch["target_state_raw"]
+        batch_position_errors = _haversine_distance_km_torch(
+            predicted_raw[:, 0],
+            predicted_raw[:, 1],
+            target_raw[:, 0],
+            target_raw[:, 1],
+        )
+
         if is_training:
             loss.backward()
             if grad_clip is not None and grad_clip > 0:
@@ -468,6 +680,11 @@ def _run_epoch(
         total_samples += batch_size
         for key in total_parts:
             total_parts[key] += loss_parts[key] * batch_size
+        position_error_sum += float(batch_position_errors.sum().cpu())
+        position_sq_error_sum += float(batch_position_errors.pow(2).sum().cpu())
+        wind_abs_error_sum += float(torch.abs(predicted_raw[:, 2] - target_raw[:, 2]).sum().cpu())
+        pressure_abs_error_sum += float(torch.abs(predicted_raw[:, 3] - target_raw[:, 3]).sum().cpu())
+        position_errors.extend(batch_position_errors.cpu().tolist())
 
     if total_samples == 0:
         raise ValueError("No samples were produced for the current epoch.")
@@ -476,6 +693,11 @@ def _run_epoch(
         "loss": total_loss / total_samples,
         "samples": total_samples,
         "batches": len(loader),
+        "mean_position_error_km": position_error_sum / total_samples,
+        "median_position_error_km": float(np.median(position_errors)) if position_errors else 0.0,
+        "rmse_position_error_km": float(np.sqrt(position_sq_error_sum / total_samples)),
+        "wind_mae": wind_abs_error_sum / total_samples,
+        "pressure_mae": pressure_abs_error_sum / total_samples,
     }
     for key, value in total_parts.items():
         metrics[key] = value / total_samples
@@ -503,14 +725,20 @@ def train(
     coriolis_weight: float = 1e4,
     wind_pressure_weight: float = 0.05,
     nearshore_weight: float = 0.02,
+    velocity_supervised_weight: float = 1e-3,
+    test_ratio: float = 0.0,
 ) -> Path:
     _set_reproducible_seed(seed)
     device_obj = _resolve_device(device)
 
-    frame = _prepare_dataframe(load_dataset(dataset_path))
-    train_frame, val_frame, train_storm_ids, val_storm_ids = _split_frame_by_storm(
+    raw_frame = load_dataset(dataset_path)
+    dataset_files = raw_frame.attrs.get("dataset_files", [])
+    total_raw_rows = int(raw_frame.attrs.get("total_raw_rows", len(raw_frame)))
+    frame = _prepare_dataframe(raw_frame)
+    train_frame, val_frame, test_frame, train_storm_ids, val_storm_ids, test_storm_ids = _split_frame_by_storm(
         frame,
         val_ratio=val_ratio,
+        test_ratio=test_ratio,
         seed=seed,
     )
     scaler = TensorScaler.fit(train_frame, FEATURE_COLUMNS)
@@ -523,30 +751,56 @@ def train(
             print("Validation split has no usable sequential samples; continuing without validation.")
             val_frame = val_frame.iloc[0:0].copy()
             val_storm_ids = []
+    test_dataset: TyphoonSequenceDataset | None = None
+    if not test_frame.empty:
+        try:
+            test_dataset = TyphoonSequenceDataset(test_frame, scaler, sequence_length)
+        except ValueError:
+            print("Test split has no usable sequential samples; continuing without test evaluation.")
+            test_frame = test_frame.iloc[0:0].copy()
+            test_storm_ids = []
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
     val_loader = (
         DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=0) if val_dataset is not None else None
     )
+    test_loader = (
+        DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=0) if test_dataset is not None else None
+    )
     model = TyphoonPINN(input_dim=sequence_length * len(FEATURE_COLUMNS), hidden_dim=hidden_dim).to(device_obj)
     criterion = PINNLoss(
         scaler,
         velocity_weight=velocity_weight,
+        velocity_supervised_weight=velocity_supervised_weight,
         inertia_weight=inertia_weight,
         coriolis_weight=coriolis_weight,
         wind_pressure_weight=wind_pressure_weight,
         nearshore_weight=nearshore_weight,
     ).to(device_obj)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    loss_weights = _build_loss_weight_map(
+        velocity_weight=velocity_weight,
+        velocity_supervised_weight=velocity_supervised_weight,
+        inertia_weight=inertia_weight,
+        coriolis_weight=coriolis_weight,
+        wind_pressure_weight=wind_pressure_weight,
+        nearshore_weight=nearshore_weight,
+    )
 
     dataset_summary = {
+        "dataset_files": dataset_files,
+        "total_raw_rows": total_raw_rows,
+        "total_rows_after_prepare": int(len(frame)),
         "all": _summarize_frame(frame),
         "train": _summarize_frame(train_frame),
         "val": _summarize_frame(val_frame),
+        "test": _summarize_frame(test_frame),
         "train_storm_ids": train_storm_ids,
         "val_storm_ids": val_storm_ids,
+        "test_storm_ids": test_storm_ids,
         "train_sequence_samples": len(train_dataset),
         "val_sequence_samples": len(val_dataset) if val_dataset is not None else 0,
+        "test_sequence_samples": len(test_dataset) if test_dataset is not None else 0,
     }
     training_config = {
         "dataset_path": str(dataset_path) if dataset_path is not None else "",
@@ -563,20 +817,23 @@ def train(
         "min_delta": min_delta,
         "grad_clip": grad_clip,
         "velocity_weight": velocity_weight,
+        "velocity_supervised_weight": velocity_supervised_weight,
         "inertia_weight": inertia_weight,
         "coriolis_weight": coriolis_weight,
         "wind_pressure_weight": wind_pressure_weight,
         "nearshore_weight": nearshore_weight,
+        "test_ratio": test_ratio,
     }
 
     print(
         f"dataset_points={dataset_summary['all']['points']} storms={dataset_summary['all']['storms']} "
         f"train_samples={dataset_summary['train_sequence_samples']} val_samples={dataset_summary['val_sequence_samples']} "
+        f"test_samples={dataset_summary['test_sequence_samples']} "
         f"device={device_obj}"
     )
     print(
         f"time_steps={dataset_summary['all']['time_step_hours']} "
-        f"train_storms={len(train_storm_ids)} val_storms={len(val_storm_ids)}"
+        f"train_storms={len(train_storm_ids)} val_storms={len(val_storm_ids)} test_storms={len(test_storm_ids)}"
     )
 
     best_metric_name = "val_loss" if val_loader is not None else "train_loss"
@@ -596,6 +853,7 @@ def train(
             optimizer=optimizer,
             grad_clip=grad_clip,
         )
+        _attach_loss_contributions(train_metrics, loss_weights)
         val_metrics = (
             _run_epoch(
                 model=model,
@@ -606,6 +864,8 @@ def train(
             if val_loader is not None
             else None
         )
+        if val_metrics is not None:
+            _attach_loss_contributions(val_metrics, loss_weights)
 
         monitor_value = val_metrics["loss"] if val_metrics is not None else train_metrics["loss"]
         improved = monitor_value < (best_metric - min_delta)
@@ -632,11 +892,15 @@ def train(
         if should_log:
             log_message = (
                 f"epoch={epoch:04d} train_loss={train_metrics['loss']:.6f} "
-                f"train_data={train_metrics['data_loss']:.6f} train_velocity={train_metrics['velocity_loss']:.6f}"
+                f"train_data={train_metrics['data_loss']:.6f} "
+                f"train_vel_cons={train_metrics['velocity_consistency_loss']:.6f} "
+                f"train_vel_sup={train_metrics['velocity_supervised_loss']:.6f} "
+                f"train_pos_km={train_metrics['mean_position_error_km']:.3f}"
             )
             if val_metrics is not None:
                 log_message += (
                     f" val_loss={val_metrics['loss']:.6f} val_data={val_metrics['data_loss']:.6f}"
+                    f" val_pos_km={val_metrics['mean_position_error_km']:.3f}"
                     f" best_{best_metric_name}={best_metric:.6f}"
                 )
             else:
@@ -652,6 +916,20 @@ def train(
             break
 
     model.load_state_dict(best_state_dict)
+    test_metrics = (
+        _run_epoch(
+            model=model,
+            loader=test_loader,
+            criterion=criterion,
+            device=device_obj,
+        )
+        if test_loader is not None
+        else None
+    )
+    if test_metrics is not None:
+        _attach_loss_contributions(test_metrics, loss_weights)
+    best_epoch_record = next((entry for entry in history if entry["epoch"] == best_epoch), None)
+    final_epoch_record = history[-1] if history else None
     output = Path(output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     checkpoint_payload = _build_checkpoint_payload(
@@ -678,9 +956,13 @@ def train(
         "epochs_completed": len(history),
         "early_stopped": early_stopped,
         "used_validation": val_loader is not None,
+        "used_test": test_loader is not None,
         "dataset_summary": dataset_summary,
         "training_config": training_config,
         "history": history,
+        "best_epoch_record": best_epoch_record,
+        "final_epoch_record": final_epoch_record,
+        "test_metrics": {key: round(float(value), 8) for key, value in test_metrics.items()} if test_metrics else None,
         "saved_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
     resolved_report_path.write_text(json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -707,10 +989,12 @@ def main() -> None:
     parser.add_argument("--grad-clip", type=float, default=1.0, help="Gradient clipping max norm. Set to 0 to disable.")
     parser.add_argument("--log-every", type=int, default=20)
     parser.add_argument("--velocity-weight", type=float, default=1e-3)
+    parser.add_argument("--velocity-supervised-weight", type=float, default=1e-3)
     parser.add_argument("--inertia-weight", type=float, default=1e4)
     parser.add_argument("--coriolis-weight", type=float, default=1e4)
     parser.add_argument("--wind-pressure-weight", type=float, default=0.05)
     parser.add_argument("--nearshore-weight", type=float, default=0.02)
+    parser.add_argument("--test-ratio", type=float, default=0.0, help="Holdout test ratio by storm_id.")
     args = parser.parse_args()
     output = train(
         dataset_path=args.dataset,
@@ -729,10 +1013,12 @@ def main() -> None:
         report_path=args.report,
         log_every=args.log_every,
         velocity_weight=args.velocity_weight,
+        velocity_supervised_weight=args.velocity_supervised_weight,
         inertia_weight=args.inertia_weight,
         coriolis_weight=args.coriolis_weight,
         wind_pressure_weight=args.wind_pressure_weight,
         nearshore_weight=args.nearshore_weight,
+        test_ratio=args.test_ratio,
     )
     print(f"Training complete. Best weights are available at {output}")
 

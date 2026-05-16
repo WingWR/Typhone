@@ -1,0 +1,28 @@
+{
+  "storm_id": "2021-0019",
+  "storm_name": "MINDULLE",
+  "basin": "Western North Pacific",
+  "forecast_steps": 8,
+  "time_step_hours": 6,
+  "source_provider": "Local training dataset",
+  "source_dataset": "CH2021BST_pinn_dataset.csv",
+  "source_note": "Extracted from the project training set. First 6 track points are used as observations and the next 8 points as actual_track.",
+  "observations": [
+    { "lng": 148.6, "lat": 11.2, "timestamp": "2021-09-22T12:00:00Z", "wind_speed": 13, "pressure": 1002 },
+    { "lng": 147.4, "lat": 12.0, "timestamp": "2021-09-22T18:00:00Z", "wind_speed": 15, "pressure": 1000 },
+    { "lng": 146.2, "lat": 12.6, "timestamp": "2021-09-23T00:00:00Z", "wind_speed": 15, "pressure": 1000 },
+    { "lng": 144.6, "lat": 13.3, "timestamp": "2021-09-23T06:00:00Z", "wind_speed": 15, "pressure": 1000 },
+    { "lng": 143.3, "lat": 13.8, "timestamp": "2021-09-23T12:00:00Z", "wind_speed": 18, "pressure": 998 },
+    { "lng": 142.1, "lat": 14.1, "timestamp": "2021-09-23T18:00:00Z", "wind_speed": 18, "pressure": 998 }
+  ],
+  "actual_track": [
+    { "lng": 141.1, "lat": 14.6, "timestamp": "2021-09-24T00:00:00Z", "wind_speed": 20, "pressure": 995 },
+    { "lng": 140.3, "lat": 15.1, "timestamp": "2021-09-24T06:00:00Z", "wind_speed": 23, "pressure": 990 },
+    { "lng": 139.4, "lat": 15.9, "timestamp": "2021-09-24T12:00:00Z", "wind_speed": 28, "pressure": 982 },
+    { "lng": 138.7, "lat": 16.5, "timestamp": "2021-09-24T18:00:00Z", "wind_speed": 30, "pressure": 980 },
+    { "lng": 138.1, "lat": 17.1, "timestamp": "2021-09-25T00:00:00Z", "wind_speed": 33, "pressure": 975 },
+    { "lng": 137.7, "lat": 17.6, "timestamp": "2021-09-25T06:00:00Z", "wind_speed": 42, "pressure": 955 },
+    { "lng": 137.4, "lat": 18.1, "timestamp": "2021-09-25T12:00:00Z", "wind_speed": 50, "pressure": 940 },
+    { "lng": 137.0, "lat": 18.5, "timestamp": "2021-09-25T18:00:00Z", "wind_speed": 50, "pressure": 940 }
+  ]
+}

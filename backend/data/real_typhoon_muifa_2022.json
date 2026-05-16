@@ -1,0 +1,28 @@
+{
+  "storm_id": "JMA-2022-2212",
+  "storm_name": "MUIFA",
+  "basin": "Western North Pacific",
+  "forecast_steps": 8,
+  "time_step_hours": 6,
+  "source_provider": "Japan Meteorological Agency (JMA)",
+  "source_url": "https://www.data.jma.go.jp/typhoon/data/T2212.pdf",
+  "source_note": "Times are JST (+09:00). observations and actual_track are split from the official best-track sequence.",
+  "observations": [
+    { "lng": 126.9, "lat": 19.8, "timestamp": "2022-09-10T03:00:00+09:00", "wind_speed": 30, "pressure": 980 },
+    { "lng": 126.0, "lat": 20.7, "timestamp": "2022-09-10T09:00:00+09:00", "wind_speed": 35, "pressure": 970 },
+    { "lng": 125.7, "lat": 21.2, "timestamp": "2022-09-10T15:00:00+09:00", "wind_speed": 35, "pressure": 970 },
+    { "lng": 125.5, "lat": 21.7, "timestamp": "2022-09-10T21:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 124.9, "lat": 22.2, "timestamp": "2022-09-11T03:00:00+09:00", "wind_speed": 40, "pressure": 960 },
+    { "lng": 124.4, "lat": 22.6, "timestamp": "2022-09-11T09:00:00+09:00", "wind_speed": 45, "pressure": 950 }
+  ],
+  "actual_track": [
+    { "lng": 124.4, "lat": 22.9, "timestamp": "2022-09-11T15:00:00+09:00", "wind_speed": 45, "pressure": 950 },
+    { "lng": 124.3, "lat": 23.4, "timestamp": "2022-09-11T21:00:00+09:00", "wind_speed": 40, "pressure": 955 },
+    { "lng": 124.2, "lat": 23.7, "timestamp": "2022-09-12T03:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 124.2, "lat": 24.0, "timestamp": "2022-09-12T09:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 124.0, "lat": 24.8, "timestamp": "2022-09-12T15:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 124.0, "lat": 24.9, "timestamp": "2022-09-12T21:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 124.2, "lat": 25.2, "timestamp": "2022-09-13T03:00:00+09:00", "wind_speed": 40, "pressure": 965 },
+    { "lng": 124.2, "lat": 25.7, "timestamp": "2022-09-13T09:00:00+09:00", "wind_speed": 40, "pressure": 955 }
+  ]
+}
