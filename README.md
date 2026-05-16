@@ -116,6 +116,7 @@ PINN 损失函数包含数据拟合项和五项物理约束：速度一致性、
 
 前端上传的 `.json` 文件必须包含 `storm_id`、`storm_name` 和 `observations` 三个字段：
 
+**请求体：**
 ```json
 {
   "storm_id": "2026-DEMO",
