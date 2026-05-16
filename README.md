@@ -2,18 +2,47 @@
 
 Physics-Informed Neural Network 台风路径预测系统，React + DeckGL 前端 + Flask 后端，面向 AI for Science 气候建模方向。
 
-## 快速启动
+## 环境与依赖
 
-```powershell
-# 一键启动 (Windows)
-.\start.ps1
-```
+### 基础环境
 
-或分步启动：
+| 模块 | 依赖环境 | 说明 |
+|------|----------|------|
+| 后端推理 | Python 3.10+ | Flask API、NumPy 计算、PINN/基线推理 |
+| 模型训练 | Python 3.10+ | 需要 Pandas 和 PyTorch |
+| 前端界面 | Node.js 18+ / npm | Vite + React + DeckGL |
+
+### 后端依赖
+
+后端依赖写在 `backend/requirements.txt` 中：
+
+| 包 | 作用 |
+|----|------|
+| `flask` | 提供 REST API 服务 |
+| `flask-cors` | 允许前端跨域访问后端接口 |
+| `numpy` | 轨迹、速度、距离和物理量计算 |
+| `pandas` | 训练阶段读取和处理数据集 |
+| `torch` | PINN 模型定义、训练和权重推理 |
+
+说明：如果只运行后端并允许系统降级为线性平滑基线，`torch` 缺失时后端仍可启动；如果要使用完整 PINN 权重预测或重新训练模型，则必须安装 `torch`。
+
+### 训练依赖
+
+训练脚本位于 `train/train_pinn.py`，依赖同样由 `backend/requirements.txt` 提供：
+
+| 包 | 训练阶段作用 |
+|----|--------------|
+| `pandas` | 读取 CSV/JSON/JSONL 数据，完成清洗、排序、去重和数据集统计 |
+| `numpy` | 随机划分、数值处理和数据摘要计算 |
+| `torch` | 定义 MLP-PINN、DataLoader、损失函数、反向传播和保存权重 |
+
+训练完成后会写入 `backend/models/weights/typhoon_pinn_v1.pth` 和 `backend/models/weights/typhoon_pinn_v1.summary.json`，后端推理会直接读取这些文件。
+
+## 如何启动
 
 ```powershell
 # 1. 安装依赖
-pip install -r backend\requirements.txt
+python -m pip install -r backend\requirements.txt
 cd frontend && npm install && cd ..
 
 # 2. 训练模型（如无预训练权重）
@@ -120,61 +149,23 @@ PINN 损失函数包含数据拟合项和五项物理约束：速度一致性、
 
 上传不符合格式的 JSON 文件时，页面会弹出错误提示。
 
-## API
-
-基础地址：`http://127.0.0.1:5000/api`
-
-### `GET /api/health`
-```json
-{"status": "ok"}
-```
-
-### `POST /api/predict_typhoon`
-提交观测数据，获取预测轨迹。
-
-**请求体：**
-```json
-{
-  "storm_id": "2026-DEMO",
-  "storm_name": "Aster",
-  "basin": "East China Sea",
-  "forecast_steps": 8,
-  "time_step_hours": 2,
-  "observations": [
-    {"lng": 124.18, "lat": 26.54, "timestamp": "2026-07-21T00:00:00Z", "wind_speed": 33, "pressure": 980},
-    {"lng": 123.90, "lat": 27.00, "timestamp": "2026-07-21T02:00:00Z", "wind_speed": 35, "pressure": 976}
-  ]
-}
-```
-
-**主要返回字段：**
-
-| 字段 | 说明 |
-|------|------|
-| `combined_track` | 观测 + 预测完整轨迹 |
-| `pinn_track` | PINN 预测轨迹（降级时为空） |
-| `baseline_track` | 线性平滑基线轨迹 |
-| `losses` | 六项物理损失分解 |
-| `metrics` | 轨迹、风速、气压误差 |
-| `summary.inference_mode` | `"pinn"` 或 `"linear_fallback"` |
-| `weather_context` | 气象图层所需的台风中心参数 |
-
-### `GET /api/get_weather_conditions`
-返回雨量/风速/气压网格数据。Query 参数：`field`、`center_lng`、`center_lat`、`max_wind_speed`、`central_pressure`。
-
 ## 降级行为
 
-当 `backend/models/weights/typhoon_pinn_v1.pth` 不存在时，接口自动切换为线性平滑基线预测。系统仍然可用，但 `inference_mode` 会返回 `"linear_fallback"`。训练模型后即可启用完整 PINN 推理。
+后端启动时会尝试加载 `backend/models/weights/typhoon_pinn_v1.pth`。如果 PyTorch 不可用、权重文件不存在，或 PINN 推理过程中出现异常，系统会自动切换为线性平滑基线预测。此时接口仍然可用，但返回结果中的 `summary.inference_mode` 会显示为 `"linear_fallback"`。
+
+如果希望启用完整 PINN 推理，需要确保：
+
+- 当前 Python 环境可以 `import torch`。
+- `backend/models/weights/typhoon_pinn_v1.pth` 存在。
+- 启动脚本或命令使用的是安装了后端依赖的 Python 环境。
 
 ## 项目结构
 
 ```
 Typhone/
-├── start.ps1                    # 一键启动脚本
 ├── train/
 │   ├── train_pinn.py            # 训练管线
-│   ├── CH2025BST_pinn_dataset.csv
-│   └── README.md                # 训练说明
+│   └── CH2025BST_pinn_dataset.csv
 ├── backend/
 │   ├── app.py                   # Flask 入口
 │   ├── config.py                # 域参数配置
@@ -201,11 +192,3 @@ Typhone/
     │   └── constants/map.js
     └── package.json
 ```
-
-## 技术栈
-
-| 层 | 技术 |
-|----|------|
-| 模型 | PyTorch, PINN（物理约束损失） |
-| 后端 | Flask, NumPy, Pandas |
-| 前端 | React 19, DeckGL 9, MUI 7, Vite |
